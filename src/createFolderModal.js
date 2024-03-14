@@ -54,6 +54,7 @@ const styles = StyleSheet.create({
     modalTitle: {
         fontSize: 18,
         marginBottom: 10,
+        color: 'black'
     },
     input: {
         borderWidth: 1,
@@ -61,6 +62,7 @@ const styles = StyleSheet.create({
         borderRadius: 5,
         padding: 10,
         marginBottom: 10,
+        color: 'black'
     },
     buttonContainer: {
         flexDirection: 'row',

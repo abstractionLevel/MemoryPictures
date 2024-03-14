@@ -5,10 +5,10 @@ import AntDesign from 'react-native-vector-icons/AntDesign';
 import Feather from 'react-native-vector-icons/Feather';
 import { FOLDERS_DIRECTORY_PATH } from '../constant/constants';
 import { Camera, useCameraDevices } from 'react-native-vision-camera';
+import RNFS from 'react-native-fs';
 
 const CameraComponent = ({ folder, onClose }) => {
 
-    let cameraRef = useRef(null);
     const [cameraPermission, setCameraPermission] = useState();
     const [capturedImage, setCapturedImage] = useState(null);
     const [isModalVisible, setIsModalVisible] = useState(false);
@@ -16,14 +16,12 @@ const CameraComponent = ({ folder, onClose }) => {
     const [isCamera, setIsCamera] = useState(true);
     const camera = useRef(null);
     const devices = useCameraDevices();
-    console.log("use dev", useCameraDevices)
     const device = devices.back;
 
     const takePicture = async () => {
         setColorCircleCamera("red");
         try {
             const data = await camera.current.takePhoto({});
-            console.log("data ",data)
             setCapturedImage(data.path);
         } catch (error) {
             console.error('Errore durante la cattura dell\'immagine:', error);
@@ -33,7 +31,14 @@ const CameraComponent = ({ folder, onClose }) => {
     const saveImageHandler = async (fileName) => {
         if (capturedImage) {
             const directoryTo = FOLDERS_DIRECTORY_PATH + folder + "/" + fileName;
-            // Esegui qui il salvataggio dell'immagine nella cartella specificata
+            const imagePathTo = directoryTo;
+    
+            try {
+                await RNFS.copyFile(capturedImage, imagePathTo);
+                console.log('Immagine salvata con successo:', imagePathTo);
+            } catch (error) {
+                console.error('Errore durante il salvataggio dell\'immagine:', error);
+            }
         }
     };
 
@@ -45,7 +50,6 @@ const CameraComponent = ({ folder, onClose }) => {
     useEffect(() => {
         async function getPermission() {
             const newCameraPermission = await Camera.requestCameraPermission();
-            console.log(newCameraPermission);
         }
         getPermission();
     }, []);

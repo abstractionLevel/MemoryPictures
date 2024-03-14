@@ -8,7 +8,7 @@ const RenameFolderModal = ({ visible, onClose, folder }) => {
 
     const handleRenameFolder = async () => {
         try {
-            await RNFS.move(FOLDERS_DIRECTORY_PATH + '/' + folder, FOLDERS_DIRECTORY_PATH + '/' + folderName);
+            await RNFS.moveFile(FOLDERS_DIRECTORY_PATH + '/' + folder, FOLDERS_DIRECTORY_PATH + '/' + folderName);
             setFolderName(null);
             onClose();
         } catch (error) {
@@ -80,6 +80,7 @@ const styles = StyleSheet.create({
         borderRadius: 5,
         padding: 10,
         marginBottom: 10,
+        color:'black'
     },
     buttonContainer: {
         flexDirection: 'row',

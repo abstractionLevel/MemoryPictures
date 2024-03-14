@@ -45,7 +45,7 @@ const RenameFileModal = ({ visible, onClose, folder, file }) => {
                     />
                     <View style={styles.buttonContainer}>
                         <View style={styles.button}>
-                            <Button title="Fatto" onPress={handleRenameFile} />
+                            <Button title="Salva" onPress={handleRenameFile} />
                         </View>
                         <View style={styles.button}>
                             <Button title="Annulla" onPress={onCloseModal} />
@@ -82,6 +82,7 @@ const styles = StyleSheet.create({
         borderRadius: 5,
         padding: 10,
         marginBottom: 10,
+        color:'black'
     },
     buttonContainer: {
         flexDirection: 'row',

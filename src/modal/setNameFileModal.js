@@ -5,7 +5,6 @@ import { View, Text, Modal, TextInput, Button, StyleSheet } from 'react-native';
 const SetFileNameModal = ({ visible, onClose, onSetFileName }) => {
 
     const [fileName, setfileName] = useState(null);
-
     const handleCreateFolder = () => {
         if (fileName.trim() !== '') {
             onSetFileName(fileName);
@@ -23,15 +22,15 @@ const SetFileNameModal = ({ visible, onClose, onSetFileName }) => {
         >
             <View style={styles.modalContainer}>
                 <View style={styles.modalContent}>
+                    <Text style={{color:'black'}}>Chose a name</Text>
                     <TextInput
                         style={styles.input}
-                        placeholder="Nome del file"
                         value={fileName}
                         onChangeText={setfileName}
                     />
                     <View style={styles.buttonContainer}>
                         <View style={styles.button}>
-                            <Button title="Fatto" onPress={handleCreateFolder} />
+                            <Button title="Salva" onPress={handleCreateFolder} />
                         </View>
                         <View style={styles.button}>
                             <Button title="Annulla" onPress={onClose} />
@@ -67,6 +66,7 @@ const styles = StyleSheet.create({
         borderRadius: 5,
         padding: 10,
         marginBottom: 10,
+        color: 'black'
     },
     buttonContainer: {
         flexDirection: 'row',

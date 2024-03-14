@@ -59,7 +59,7 @@ const Folder = ({ navigation, route }) => {
         try {
             const documentDirectory = FOLDERS_DIRECTORY_PATH + folder;
             const contentFolder = await RNFS.readDir(documentDirectory);
-            console.log("conteent folder ", contentFolder)
+            console.log("content folder --- ",contentFolder)
             let contents = [];
             if(contentFolder) {
                 for (const item of contentFolder) {
@@ -103,8 +103,8 @@ const Folder = ({ navigation, route }) => {
         } else {
             return (
                 <TouchableOpacity style={{ padding: 2 }} onLongPress={() => onPressHeadMenu(item)} onPress={() => { setOpenImageModal(true); setImageClicked(FOLDERS_DIRECTORY_PATH + folder + "/" + item) }}>
-                    <Image source={{ uri: FOLDERS_DIRECTORY_PATH + folder + "/" + item }} style={{ width: 100, height: 100, borderRadius: 10, padding: 0 }} />
-                    <Text numberOfLines={2} style={{ width: 80, height: 30, fontSize: 10, textAlign: 'center' }}>{item}</Text>
+                    <Image source={{ uri: `file://'${FOLDERS_DIRECTORY_PATH + folder + "/" + item}` }} style={{ width: 100, height: 100, borderRadius: 10, padding: 0 }} />
+                    <Text numberOfLines={2} style={{ width: 80, height: 30, fontSize: 10, textAlign: 'center' ,color:'black'}}>{item}</Text>
                 </TouchableOpacity>
             )
         }

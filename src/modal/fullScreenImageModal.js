@@ -11,7 +11,7 @@ const FullScreenImageModal = ({ isVisible, pathImage, onClose }) => {
                     <AntDesign name="close" size={24} color="white" />
                 </TouchableOpacity>
                 <Image
-                    source={{ uri: pathImage }} 
+                    source={{ uri: `file://'${pathImage}` }} 
                     style={styles.fullScreenImage}
                 />
             </View>

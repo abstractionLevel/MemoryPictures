@@ -33,7 +33,7 @@ const DeleteFileModal = ({ visible, onClose, folder, file }) => {
         >
             <View style={styles.modalContainer}>
                 <View style={styles.modalContent}>
-                    <Text>Are you sure delete file?</Text>
+                    <Text style={{color:'black'}}>Are you sure delete file?</Text>
                     <View style={styles.buttonContainer}>
                         <View style={styles.button}>
                             <Button title="Delete" onPress={handleDeleteFile} />
