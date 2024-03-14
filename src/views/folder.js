@@ -11,11 +11,13 @@ import RenameFileModal from '../modal/renameFileModal';
 import DeleteFileModal from '../modal/deleteFileModal';
 import { FOLDERS_DIRECTORY_PATH } from '../constant/constants';
 import { getUniqueDatesFromArray } from '../utils/date';
+import { useSelector, useDispatch } from 'react-redux';
 
 const Folder = ({ navigation, route }) => {
 
     const folder = route.params.folder;
-
+    const isModalOpen = useSelector((state) => state.menuFolder.isOpen);
+    const dispatch = useDispatch();
     const [openCamera, setOpenCamera] = useState(false);
     const [images, setImages] = useState(null);
     const [openImageModal, setOpenImageModal] = useState(null);
@@ -25,6 +27,8 @@ const Folder = ({ navigation, route }) => {
     const [isModalDelete, setIsModalDelete] = useState(null);
     const [currentFile, setCurrentFile] = useState(null);
 
+
+    // TODO: ora che c'e' redux, implementare l azione per far aprire il menu
     const hideHeader = () => {
         navigation.setParams({ showHeader: false });
     };
