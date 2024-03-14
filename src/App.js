@@ -31,7 +31,7 @@ export default function App() {
       <Stack.Navigator>
         <Stack.Screen name="Folders" component={Folders} options={{ title: 'Folders' }} />
         <Stack.Screen name="Folder" component={Folder} options={({ route }) => ({
-          headerShown: route.params?.showHeader ?? true, // Mostra l'header per impostazione predefinita, a meno che non sia specificato diversamente nei parametri della route
+          headerShown: route.params?.showHeader ?? true, 
           title: route.params?.title ?? 'Default Title',
         })} />
       </Stack.Navigator>

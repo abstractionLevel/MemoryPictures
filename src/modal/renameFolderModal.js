@@ -44,10 +44,10 @@ const RenameFolderModal = ({ visible, onClose, folder }) => {
                     />
                     <View style={styles.buttonContainer}>
                         <View style={styles.button}>
-                            <Button title="Fatto" onPress={handleRenameFolder} />
+                            <Button title="Save" onPress={handleRenameFolder} />
                         </View>
                         <View style={styles.button}>
-                            <Button title="Annulla" onPress={onCloseModal} />
+                            <Button title="Cancel" onPress={onCloseModal} />
                         </View>
                     </View>
                 </View>

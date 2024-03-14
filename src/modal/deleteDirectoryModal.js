@@ -11,8 +11,6 @@ const DeleteFolderModal = ({ visible, onClose, folder }) => {
             if (folderExists) {
                 await RNFS.unlink(FOLDERS_DIRECTORY_PATH + '/' + folder);
                 onClose();
-            } else {
-                console.log('Errore', 'La directory non esiste.');
             }
         } catch (error) {
             console.error('Errore durante la cancellazione della directory:', error);
@@ -32,7 +30,7 @@ const DeleteFolderModal = ({ visible, onClose, folder }) => {
         >
             <View style={styles.modalContainer}>
                 <View style={styles.modalContent}>
-                    <Text>Are you sure delete directory?</Text>
+                    <Text style={{color:'black',marginBottom:20,textAlign:'center'}}>Are you sure delete directory?</Text>
                     <View style={styles.buttonContainer}>
                         <View style={styles.button}>
                             <Button title="Delete" onPress={handleDeleteFolder} />

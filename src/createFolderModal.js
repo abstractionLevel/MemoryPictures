@@ -21,7 +21,7 @@ const CreateFolderModal = ({ visible, onClose, onCreateFolder }) => {
         >
             <View style={styles.modalContainer}>
                 <View style={styles.modalContent}>
-                    <Text style={styles.modalTitle}>Inserisci il nome della cartella</Text>
+                    <Text style={styles.modalTitle}>Name of folder</Text>
                     <TextInput
                         style={styles.input}
                         placeholder="Nome della cartella"
@@ -29,9 +29,14 @@ const CreateFolderModal = ({ visible, onClose, onCreateFolder }) => {
                         onChangeText={setFolderName}
                     />
                     <View style={styles.buttonContainer}>
-                        <Button title="Fatto" onPress={handleCreateFolder} />
-                        <Button title="Annulla" onPress={onClose} />
+                        <View style={styles.button}>
+                            <Button title="Save" onPress={handleCreateFolder} />
+                        </View>
+                        <View style={styles.button}>
+                            <Button title="Cancel" onPress={onClose} />
+                        </View>
                     </View>
+
                 </View>
             </View>
         </Modal>
@@ -65,8 +70,14 @@ const styles = StyleSheet.create({
         color: 'black'
     },
     buttonContainer: {
+        width:'80%',
         flexDirection: 'row',
         justifyContent: 'space-around',
+        marginTop: 10,
+    },
+    button: {
+        flex: 1,
+        marginHorizontal: 5, // Aggiungi spaziatura tra i pulsanti se necessario
     },
 });
 

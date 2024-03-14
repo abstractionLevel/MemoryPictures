@@ -111,7 +111,7 @@ const Folders = ({ navigation }) => {
             )}
             <View style={{ width: '100%', alignItems: 'center', marginTop: 100 }}>
                 <View style={{ width: '50%' }}>
-                    <Button style={{ with: 20 }} title="Crea Cartella" onPress={() => setIsModalVisible(true)} />
+                    <Button style={{ with: 20 }} title="Add folder" onPress={() => setIsModalVisible(true)} />
                 </View>
             </View>
             <CreateFolderModal

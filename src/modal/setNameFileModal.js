@@ -30,10 +30,10 @@ const SetFileNameModal = ({ visible, onClose, onSetFileName }) => {
                     />
                     <View style={styles.buttonContainer}>
                         <View style={styles.button}>
-                            <Button title="Salva" onPress={handleCreateFolder} />
+                            <Button title="Save" onPress={handleCreateFolder} />
                         </View>
                         <View style={styles.button}>
-                            <Button title="Annulla" onPress={onClose} />
+                            <Button title="Cancel" onPress={onClose} />
                         </View>
                     </View>
                 </View>

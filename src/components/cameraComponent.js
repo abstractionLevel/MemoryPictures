@@ -65,10 +65,10 @@ const CameraComponent = ({ folder, onClose }) => {
                     <Image source={{ uri: `file://'${capturedImage}` }} style={styles.previewImage} />
                     <View style={styles.buttonContainer}>
                         <View style={styles.buttonWrapper}>
-                            <Button title="Salva Immagine" onPress={() => setIsModalVisible(true)} style={styles.button} />
+                            <Button title="Save Picture" onPress={() => setIsModalVisible(true)} style={styles.button} />
                         </View>
                         <View style={styles.buttonWrapper}>
-                            <Button title="Annulla" onPress={onClose} style={styles.button} />
+                            <Button title="Cancel" onPress={onClose} style={styles.button} />
                         </View>
                     </View>
                 </View>
