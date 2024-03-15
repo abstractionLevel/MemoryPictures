@@ -2,22 +2,21 @@ import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, Button, FlatList, TouchableOpacity, Image, Text } from 'react-native';
 import RNFS from 'react-native-fs';
 import CameraComponent from '../components/cameraComponent';
-import AntDesign  from 'react-native-vector-icons/AntDesign';
-import FontAwesome6  from 'react-native-vector-icons/FontAwesome6';
-import  Entypo  from 'react-native-vector-icons/Entypo';
+import AntDesign from 'react-native-vector-icons/AntDesign';
+import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
+import Entypo from 'react-native-vector-icons/Entypo';
 
 import FullScreenImageModal from '../modal/fullScreenImageModal';
 import RenameFileModal from '../modal/renameFileModal';
 import DeleteFileModal from '../modal/deleteFileModal';
 import { FOLDERS_DIRECTORY_PATH } from '../constant/constants';
 import { getUniqueDatesFromArray } from '../utils/date';
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
 
 const Folder = ({ navigation, route }) => {
 
     const folder = route.params.folder;
-    const isModalOpen = useSelector((state) => state.menuFolder.isOpen);
-    const dispatch = useDispatch();
+    const isMenuOpen = useSelector((state) => state.menuFolder.isOpen);
     const [openCamera, setOpenCamera] = useState(false);
     const [images, setImages] = useState(null);
     const [openImageModal, setOpenImageModal] = useState(null);
@@ -28,7 +27,6 @@ const Folder = ({ navigation, route }) => {
     const [currentFile, setCurrentFile] = useState(null);
 
 
-    // TODO: ora che c'e' redux, implementare l azione per far aprire il menu
     const hideHeader = () => {
         navigation.setParams({ showHeader: false });
     };
@@ -50,10 +48,10 @@ const Folder = ({ navigation, route }) => {
             groupedPicture.push(dateGroup);
         });
         groupedPicture.sort((a, b) => {
-            if(a.date && b.date) {
+            if (a.date && b.date) {
                 const dateA = new Date(a.date.split('/').reverse().join('-'));
                 const dateB = new Date(b.date.split('/').reverse().join('-'));
-                return  dateB - dateA;
+                return dateB - dateA;
             }
         });
         setImages(groupedPicture);
@@ -63,11 +61,9 @@ const Folder = ({ navigation, route }) => {
         try {
             const documentDirectory = FOLDERS_DIRECTORY_PATH + folder;
             const contentFolder = await RNFS.readDir(documentDirectory);
-            console.log("content folder --- ",contentFolder)
             let contents = [];
-            if(contentFolder) {
+            if (contentFolder) {
                 for (const item of contentFolder) {
-                    console.log("item ",item)
                     try {
                         const fileInfo = await RNFS.stat(item.path);
                         const date = new Date(fileInfo.mtime);
@@ -83,7 +79,7 @@ const Folder = ({ navigation, route }) => {
                     }
                 }
             }
-           
+
             contents.push({ name: "add" })
             groupedFotoByDate(contents);
 
@@ -108,7 +104,7 @@ const Folder = ({ navigation, route }) => {
             return (
                 <TouchableOpacity style={{ padding: 2 }} onLongPress={() => onPressHeadMenu(item)} onPress={() => { setOpenImageModal(true); setImageClicked(FOLDERS_DIRECTORY_PATH + folder + "/" + item) }}>
                     <Image source={{ uri: `file://'${FOLDERS_DIRECTORY_PATH + folder + "/" + item}` }} style={{ width: 100, height: 100, borderRadius: 10, padding: 0 }} />
-                    <Text numberOfLines={2} style={{ width: 80, height: 30, fontSize: 10, textAlign: 'center' ,color:'black'}}>{item}</Text>
+                    <Text numberOfLines={2} style={{ width: 80, height: 30, fontSize: 10, textAlign: 'center', color: 'black' }}>{item}</Text>
                 </TouchableOpacity>
             )
         }
@@ -150,6 +146,13 @@ const Folder = ({ navigation, route }) => {
 
     return (
         <View style={styles.container}>
+            {isMenuOpen &&
+                <View style={styles.menu}>
+                    <View style={styles.menuContent}>
+                        <Text style={styles.menuLabel}>Import pictures</Text>
+                    </View>
+                </View>
+            }
             {visibleHeadMenu &&
                 <View style={styles.headMenu}>
                     <View>
@@ -227,6 +230,26 @@ const styles = StyleSheet.create({
         fontSize: 16,
         marginBottom: 8
     },
+    menu: {
+        width: '100%',
+        height: 50,
+        flexDirection: 'row',
+        justifyContent: 'flex-end',
+    },
+    menuContent: {
+        width: 150,
+        height: 200,
+        borderColor: 'black',
+        borderWidth: 1,
+        borderRadius: 10,
+        marginRight: 5,
+        zIndex: 100,
+        padding:4
+    },
+    menuLabel: {
+        fontSize:18,
+        
+    }
 });
 
 export default Folder;

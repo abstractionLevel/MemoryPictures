@@ -1,5 +1,5 @@
 
-import { OPEN_MENU, CLOSE_MENU } from '../actions/menuFolderActions';
+import { CLICK_MENU } from '../actions/menuFolderActions';
 
 const initialState = {
     isOpen: false,
@@ -7,10 +7,8 @@ const initialState = {
 
 const menuFolderReducer = (state = initialState, action) => {
     switch (action.type) {
-        case OPEN_MENU:
-            return { ...state, isOpen: true };
-        case CLOSE_MENU:
-            return { ...state, isOpen: false };
+        case CLICK_MENU:
+            return { ...state, isOpen: !state.isOpen };
         default:
             return state;
     }
