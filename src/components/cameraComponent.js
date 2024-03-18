@@ -6,6 +6,7 @@ import Feather from 'react-native-vector-icons/Feather';
 import { FOLDERS_DIRECTORY_PATH } from '../constant/constants';
 import { Camera, useCameraDevices } from 'react-native-vision-camera';
 import RNFS from 'react-native-fs';
+import { writeFile } from '../services/fileService';
 
 const CameraComponent = ({ folder, onClose }) => {
 
@@ -29,17 +30,18 @@ const CameraComponent = ({ folder, onClose }) => {
     };
 
     const saveImageHandler = async (fileName) => {
-        if (capturedImage) {
-            const directoryTo = FOLDERS_DIRECTORY_PATH + folder + "/" + fileName;
-            const imagePathTo = directoryTo;
+        await writeFile(capturedImage,folder,fileName)
+        // if (capturedImage) {
+        //     const directoryTo = FOLDERS_DIRECTORY_PATH + folder + "/" + fileName;
+        //     const imagePathTo = directoryTo;
     
-            try {
-                await RNFS.copyFile(capturedImage, imagePathTo);
-                console.log('Immagine salvata con successo:', imagePathTo);
-            } catch (error) {
-                console.error('Errore durante il salvataggio dell\'immagine:', error);
-            }
-        }
+        //     try {
+        //         await RNFS.copyFile(capturedImage, imagePathTo);
+        //         console.log('Immagine salvata con successo:', imagePathTo);
+        //     } catch (error) {
+        //         console.error('Errore durante il salvataggio dell\'immagine:', error);
+        //     }
+        // }
     };
 
     const closeModalCamera = () => {

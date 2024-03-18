@@ -5,13 +5,15 @@ import CameraComponent from '../components/cameraComponent';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import Entypo from 'react-native-vector-icons/Entypo';
-
+import ImagePicker from 'react-native-image-crop-picker';
 import FullScreenImageModal from '../modal/fullScreenImageModal';
 import RenameFileModal from '../modal/renameFileModal';
 import DeleteFileModal from '../modal/deleteFileModal';
 import { FOLDERS_DIRECTORY_PATH } from '../constant/constants';
 import { getUniqueDatesFromArray } from '../utils/date';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import { writeFile } from '../services/fileService';
+import { clickMenu } from '../redux/actions/menuFolderActions';
 
 const Folder = ({ navigation, route }) => {
 
@@ -25,7 +27,9 @@ const Folder = ({ navigation, route }) => {
     const [isModalRename, setIsModalRename] = useState(null);
     const [isModalDelete, setIsModalDelete] = useState(null);
     const [currentFile, setCurrentFile] = useState(null);
-
+    const [selectedImage, setSelectedImage] = useState(null);
+    const [loadView,setLoadView] = useState(null);
+	const dispatch = useDispatch();
 
     const hideHeader = () => {
         navigation.setParams({ showHeader: false });
@@ -34,6 +38,23 @@ const Folder = ({ navigation, route }) => {
     const showHeader = () => {
         navigation.setParams({ showHeader: true });
     };
+
+    const selectImageHandler = () => {
+       
+        ImagePicker.openPicker({
+            multiple: true
+        }).then(files => {
+            saveFIle(files);
+        });
+    };
+
+    const saveFIle = async (files) => {
+        for (const file of files) {
+            const fileName = file.path.split('/').pop();
+            await writeFile(file.path,folder,fileName)
+        }
+        setLoadView(true);
+    }
 
     const groupedFotoByDate = (resp) => {
         const uniqueDate = getUniqueDatesFromArray(resp);
@@ -142,14 +163,19 @@ const Folder = ({ navigation, route }) => {
     useEffect(() => {
         fetchContentInFolder();
         if (!isModalRename) setVisibleHeadMenu(false);
-    }, [isModalRename, isModalDelete]);
+        if(loadView) setLoadView(false);
+        if(isMenuOpen) dispatch(clickMenu());
+    }, [isModalRename, isModalDelete,loadView]);
 
     return (
         <View style={styles.container}>
             {isMenuOpen &&
                 <View style={styles.menu}>
                     <View style={styles.menuContent}>
-                        <Text style={styles.menuLabel}>Import pictures</Text>
+                        <TouchableOpacity onPress={selectImageHandler}>
+                            <Text style={styles.menuLabel}>Import Files</Text>
+                        </TouchableOpacity>
+
                     </View>
                 </View>
             }
@@ -244,11 +270,13 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         marginRight: 5,
         zIndex: 100,
-        padding:4
+        padding: 4,
+        backgroundColor:'white'
+
     },
     menuLabel: {
-        fontSize:18,
-        
+        fontSize: 18,
+
     }
 });
 
