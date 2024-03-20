@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, Button, FlatList, TouchableOpacity, Image, Text } from 'react-native';
+import { StyleSheet, View, Linking, FlatList, TouchableOpacity, Image, Text } from 'react-native';
 import RNFS from 'react-native-fs';
 import CameraComponent from '../components/cameraComponent';
 import AntDesign from 'react-native-vector-icons/AntDesign';
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import Entypo from 'react-native-vector-icons/Entypo';
-import ImagePicker from 'react-native-image-crop-picker';
 import FullScreenImageModal from '../modal/fullScreenImageModal';
 import RenameFileModal from '../modal/renameFileModal';
 import DeleteFileModal from '../modal/deleteFileModal';
@@ -16,6 +16,7 @@ import { writeFile } from '../services/fileService';
 import { clickMenu } from '../redux/actions/menuFolderActions';
 import DocumentPicker from 'react-native-document-picker';
 import fileType from 'react-native-file-type'
+import FileViewer from "react-native-file-viewer";
 
 const Folder = ({ navigation, route }) => {
 
@@ -127,6 +128,16 @@ const Folder = ({ navigation, route }) => {
         setCurrentFile(item);
     }
 
+    const openFile = async (filePath) => {
+        FileViewer.open(filePath)
+            .then(() => {
+                console.log('Success');
+            })
+            .catch(_err => {
+                console.log('Errore ', _err);
+            });
+    };
+
     const renderImage = ({ item }) => {
         const isImage = imageExtensions.some(ext => ext === item.ext);
         if (item.name === "add") {
@@ -137,16 +148,26 @@ const Folder = ({ navigation, route }) => {
             )
         } else if (isImage) {
             return (
-                <TouchableOpacity style={{ padding: 2 }} onLongPress={() => onPressHeadMenu(item)} onPress={() => { setOpenImageModal(true); setImageClicked(FOLDERS_DIRECTORY_PATH + folder + "/" + item.name) }}>
+                <TouchableOpacity style={{ padding: 2 }}
+                    onLongPress={() => onPressHeadMenu(item.name)}
+                    onPress={() => { setOpenImageModal(true); setImageClicked(FOLDERS_DIRECTORY_PATH + folder + "/" + item.name) }}
+                >
                     <Image source={{ uri: `file://'${FOLDERS_DIRECTORY_PATH + folder + "/" + item.name}` }} style={{ width: 100, height: 100, borderRadius: 10, padding: 0 }} />
                     <Text numberOfLines={2} style={{ width: 80, height: 30, fontSize: 10, textAlign: 'center', color: 'black' }}>{item.name}</Text>
                 </TouchableOpacity>
             )
-        } else if (item.ext === "pdf") {
+        } else {
             return (
                 <View>
-                    <TouchableOpacity style={{ width: 100, height: 100, borderWidth: 1, borderRadius: 10, alignItems: 'center', justifyContent: 'center' }} onPress={() => setOpenCamera(true)}>
-                        <AntDesign name="pdffile1" size={40} color="red" />
+                    <TouchableOpacity
+                        onPress={() => openFile(FOLDERS_DIRECTORY_PATH + folder + "/" + item.name)}
+                        onLongPress={() => onPressHeadMenu(item.name)} style={{ width: 100, height: 100, borderWidth: 1, borderRadius: 10, alignItems: 'center', justifyContent: 'center' }}
+                    >
+                        <FontAwesome name={
+                                item.ext === 'pdf' ? 'file-pdf-o' : 
+                                item.ext === 'XLS' || item.error === 'XLSX' ? 'file-excel-o' :
+                                item.ext === 'TXT ' ? 'file-text-o' : null} size={40} color="red" 
+                        />
                     </TouchableOpacity>
                     <Text numberOfLines={2} style={{ width: 80, height: 30, fontSize: 10, textAlign: 'center', color: 'black' }}>{item.name}</Text>
                 </View>
