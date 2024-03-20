@@ -14,6 +14,8 @@ import { getUniqueDatesFromArray } from '../utils/date';
 import { useDispatch, useSelector } from 'react-redux';
 import { writeFile } from '../services/fileService';
 import { clickMenu } from '../redux/actions/menuFolderActions';
+import DocumentPicker from 'react-native-document-picker';
+import fileType from 'react-native-file-type'
 
 const Folder = ({ navigation, route }) => {
 
@@ -28,8 +30,10 @@ const Folder = ({ navigation, route }) => {
     const [isModalDelete, setIsModalDelete] = useState(null);
     const [currentFile, setCurrentFile] = useState(null);
     const [selectedImage, setSelectedImage] = useState(null);
-    const [loadView,setLoadView] = useState(null);
-	const dispatch = useDispatch();
+    const [loadView, setLoadView] = useState(null);
+    const dispatch = useDispatch();
+    const imageExtensions = ['jpeg', 'jpg', 'png', 'gif', 'bmp', 'tiff', 'tif'];
+
 
     const hideHeader = () => {
         navigation.setParams({ showHeader: false });
@@ -39,19 +43,27 @@ const Folder = ({ navigation, route }) => {
         navigation.setParams({ showHeader: true });
     };
 
-    const selectImageHandler = () => {
-       
-        ImagePicker.openPicker({
-            multiple: true
-        }).then(files => {
-            saveFIle(files);
-        });
+    const selectImageHandler = async () => {
+        try {
+            const results = await DocumentPicker.pick({
+                type: [DocumentPicker.types.allFiles],
+                allowMultiSelection: true
+            });
+
+            console.log('Files selezionati:', results);
+            saveFIle(results);
+        } catch (error) {
+            if (DocumentPicker.isCancel(error)) {
+                console.log('Selezione del file annullata');
+            } else {
+                console.log('Errore durante la selezione del file:', error);
+            }
+        }
     };
 
     const saveFIle = async (files) => {
         for (const file of files) {
-            const fileName = file.path.split('/').pop();
-            await writeFile(file.path,folder,fileName)
+            await writeFile(file.uri, folder, file.name)
         }
         setLoadView(true);
     }
@@ -60,10 +72,10 @@ const Folder = ({ navigation, route }) => {
         const uniqueDate = getUniqueDatesFromArray(resp);
         let groupedPicture = [];
         uniqueDate.forEach(date => {//per ogni data
-            const dateGroup = { date: date, image: [] };//setto la prima data
+            const dateGroup = { date: date, file: [] };//setto la prima data
             resp.forEach(item => {//itero l array d immagini
                 if (date === item.date) {
-                    dateGroup.image.push(item.name);//setto l immagine che combacia con la data
+                    dateGroup.file.push({ name: item.name, ext: item.type });//setto l immagine che combacia con la data
                 }
             });
             groupedPicture.push(dateGroup);
@@ -85,14 +97,17 @@ const Folder = ({ navigation, route }) => {
             let contents = [];
             if (contentFolder) {
                 for (const item of contentFolder) {
+
                     try {
                         const fileInfo = await RNFS.stat(item.path);
+                        const fType = await fileType(item.path).then(type => type.ext)
                         const date = new Date(fileInfo.mtime);
                         const formattedDate = date.toLocaleDateString();
                         if (item) {
                             contents.push({
                                 name: item.name,
-                                date: formattedDate
+                                date: formattedDate,
+                                type: fType
                             })
                         }
                     } catch (error) {
@@ -115,34 +130,48 @@ const Folder = ({ navigation, route }) => {
     }
 
     const renderImage = ({ item }) => {
-        if (item === "add") {
+        console.log(item)
+        const isImage = imageExtensions.some(ext => ext === item.ext);
+
+        if (item.name === "add") {
             return (
                 <TouchableOpacity style={{ width: 100, height: 100, borderWidth: 1, borderRadius: 10, alignItems: 'center', justifyContent: 'center' }} onPress={() => setOpenCamera(true)}>
                     <AntDesign name="pluscircleo" size={40} color="black" />
                 </TouchableOpacity>
             )
-        } else {
+        } else if (isImage) {
             return (
-                <TouchableOpacity style={{ padding: 2 }} onLongPress={() => onPressHeadMenu(item)} onPress={() => { setOpenImageModal(true); setImageClicked(FOLDERS_DIRECTORY_PATH + folder + "/" + item) }}>
-                    <Image source={{ uri: `file://'${FOLDERS_DIRECTORY_PATH + folder + "/" + item}` }} style={{ width: 100, height: 100, borderRadius: 10, padding: 0 }} />
-                    <Text numberOfLines={2} style={{ width: 80, height: 30, fontSize: 10, textAlign: 'center', color: 'black' }}>{item}</Text>
+                <TouchableOpacity style={{ padding: 2 }} onLongPress={() => onPressHeadMenu(item)} onPress={() => { setOpenImageModal(true); setImageClicked(FOLDERS_DIRECTORY_PATH + folder + "/" + item.name) }}>
+                    <Image source={{ uri: `file://'${FOLDERS_DIRECTORY_PATH + folder + "/" + item.name}` }} style={{ width: 100, height: 100, borderRadius: 10, padding: 0 }} />
+                    <Text numberOfLines={2} style={{ width: 80, height: 30, fontSize: 10, textAlign: 'center', color: 'black' }}>{item.name}</Text>
                 </TouchableOpacity>
+            )
+        } else if (item.ext === "pdf") {
+            return (
+                <View>
+                    <TouchableOpacity style={{ width: 100, height: 100, borderWidth: 1, borderRadius: 10, alignItems: 'center', justifyContent: 'center' }} onPress={() => setOpenCamera(true)}>
+                        <AntDesign name="pdffile1" size={40} color="red" />
+                    </TouchableOpacity>
+                    <Text numberOfLines={2} style={{ width: 80, height: 30, fontSize: 10, textAlign: 'center', color: 'black' }}>{item.name}</Text>
+                </View>
+
+
             )
         }
 
     }
 
-    const renderItem = ({ item }) => (
-        <View>
+    const renderItem = ({ item }) => {
+        return (<View>
             <Text style={styles.date}>{item.date && item.date}</Text>
             <FlatList
-                data={item.image}
+                data={item.file}
                 renderItem={renderImage}
                 keyExtractor={(item, index) => index.toString()}
                 numColumns={3}
             />
-        </View>
-    )
+        </View>)
+    }
 
     useEffect(() => {
         fetchContentInFolder()
@@ -163,9 +192,9 @@ const Folder = ({ navigation, route }) => {
     useEffect(() => {
         fetchContentInFolder();
         if (!isModalRename) setVisibleHeadMenu(false);
-        if(loadView) setLoadView(false);
-        if(isMenuOpen) dispatch(clickMenu());
-    }, [isModalRename, isModalDelete,loadView]);
+        if (loadView) setLoadView(false);
+        if (isMenuOpen) dispatch(clickMenu());
+    }, [isModalRename, isModalDelete, loadView]);
 
     return (
         <View style={styles.container}>
@@ -271,7 +300,7 @@ const styles = StyleSheet.create({
         marginRight: 5,
         zIndex: 100,
         padding: 4,
-        backgroundColor:'white'
+        backgroundColor: 'white'
 
     },
     menuLabel: {
