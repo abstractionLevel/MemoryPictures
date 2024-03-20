@@ -49,8 +49,6 @@ const Folder = ({ navigation, route }) => {
                 type: [DocumentPicker.types.allFiles],
                 allowMultiSelection: true
             });
-
-            console.log('Files selezionati:', results);
             saveFIle(results);
         } catch (error) {
             if (DocumentPicker.isCancel(error)) {
@@ -130,9 +128,7 @@ const Folder = ({ navigation, route }) => {
     }
 
     const renderImage = ({ item }) => {
-        console.log(item)
         const isImage = imageExtensions.some(ext => ext === item.ext);
-
         if (item.name === "add") {
             return (
                 <TouchableOpacity style={{ width: 100, height: 100, borderWidth: 1, borderRadius: 10, alignItems: 'center', justifyContent: 'center' }} onPress={() => setOpenCamera(true)}>
