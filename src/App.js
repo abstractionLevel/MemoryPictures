@@ -20,6 +20,7 @@ export default function App() {
 	const handleDispatch = () => {
 		dispatch(clickMenu());
 	}
+	
 	useEffect(() => {
 		const getPermissions = async () => {
 			// const { status } = await MediaLibrary.requestPermissionsAsync();

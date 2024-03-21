@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, Linking, FlatList, TouchableOpacity, Image, Text } from 'react-native';
+import { StyleSheet, View, FlatList, TouchableOpacity, Image, Text, Alert, PermissionsAndroid } from 'react-native';
 import RNFS from 'react-native-fs';
 import CameraComponent from '../components/cameraComponent';
 import AntDesign from 'react-native-vector-icons/AntDesign';
@@ -17,6 +17,9 @@ import { clickMenu } from '../redux/actions/menuFolderActions';
 import DocumentPicker from 'react-native-document-picker';
 import fileType from 'react-native-file-type'
 import FileViewer from "react-native-file-viewer";
+import { zip } from 'react-native-zip-archive'
+import { shareContent } from '../utils/share';
+import { fileExtensions } from '../utils/fileExtensions';
 
 const Folder = ({ navigation, route }) => {
 
@@ -33,7 +36,6 @@ const Folder = ({ navigation, route }) => {
     const [selectedImage, setSelectedImage] = useState(null);
     const [loadView, setLoadView] = useState(null);
     const dispatch = useDispatch();
-    const imageExtensions = ['jpeg', 'jpg', 'png', 'gif', 'bmp', 'tiff', 'tif'];
 
 
     const hideHeader = () => {
@@ -59,6 +61,14 @@ const Folder = ({ navigation, route }) => {
             }
         }
     };
+
+    selectedShareFolder = async () => {
+        await shareContent(FOLDERS_DIRECTORY_PATH + folder)
+    }
+
+    selectedShareFile = async () => {
+        await shareContent(currentFile)
+    }
 
     const saveFIle = async (files) => {
         for (const file of files) {
@@ -139,7 +149,7 @@ const Folder = ({ navigation, route }) => {
     };
 
     const renderImage = ({ item }) => {
-        const isImage = imageExtensions.some(ext => ext === item.ext);
+        const isImage = fileExtensions.some(ext => ext === item.ext);
         if (item.name === "add") {
             return (
                 <TouchableOpacity style={{ width: 100, height: 100, borderWidth: 1, borderRadius: 10, alignItems: 'center', justifyContent: 'center' }} onPress={() => setOpenCamera(true)}>
@@ -164,9 +174,9 @@ const Folder = ({ navigation, route }) => {
                         onLongPress={() => onPressHeadMenu(item.name)} style={{ width: 100, height: 100, borderWidth: 1, borderRadius: 10, alignItems: 'center', justifyContent: 'center' }}
                     >
                         <FontAwesome name={
-                                item.ext === 'pdf' ? 'file-pdf-o' : 
+                            item.ext === 'pdf' ? 'file-pdf-o' :
                                 item.ext === 'XLS' || item.error === 'XLSX' ? 'file-excel-o' :
-                                item.ext === 'TXT ' ? 'file-text-o' : null} size={40} color="red" 
+                                    item.ext === 'TXT ' ? 'file-text-o' : null} size={40} color="red"
                         />
                     </TouchableOpacity>
                     <Text numberOfLines={2} style={{ width: 80, height: 30, fontSize: 10, textAlign: 'center', color: 'black' }}>{item.name}</Text>
@@ -190,10 +200,30 @@ const Folder = ({ navigation, route }) => {
         </View>)
     }
 
+    async function requestStoragePermission() {
+
+        try {
+            const granted = await PermissionsAndroid.requestMultiple([
+                PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
+                PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+            ]);
+            if (
+                granted['android.permission.READ_EXTERNAL_STORAGE'] === PermissionsAndroid.RESULTS.GRANTED &&
+                granted['android.permission.WRITE_EXTERNAL_STORAGE'] === PermissionsAndroid.RESULTS.GRANTED
+            ) {
+                console.log('Storage permission granted');
+            } else {
+                console.log('Storage permission denied');
+            }
+        } catch (err) {
+            console.warn('Error requesting storage permission:', err);
+        }
+    }
+
     useEffect(() => {
+        requestStoragePermission();
         fetchContentInFolder()
         navigation.setParams({ title: folder });
-
     }, []);
 
     useEffect(() => {
@@ -221,6 +251,9 @@ const Folder = ({ navigation, route }) => {
                         <TouchableOpacity onPress={selectImageHandler}>
                             <Text style={styles.menuLabel}>Import Files</Text>
                         </TouchableOpacity>
+                        <TouchableOpacity onPress={selectedShareFolder}>
+                            <Text style={styles.menuLabel}>Share Folder</Text>
+                        </TouchableOpacity>
 
                     </View>
                 </View>
@@ -233,6 +266,7 @@ const Folder = ({ navigation, route }) => {
                         </TouchableOpacity>
                     </View>
                     <View style={{ flexDirection: 'row' }}>
+                        <FontAwesome name="share-alt" size={32} color="black" style={{ marginRight: 20 }} onPress={()=>selectedShareFile()}/>
                         <Entypo name="edit" size={32} color="black" style={{ marginRight: 20 }} onPress={() => setIsModalRename(true)} />
                         <FontAwesome6 name="trash" size={32} color="black" style={{ marginRight: 20 }} onPress={() => setIsModalDelete(true)} />
                     </View>
@@ -322,7 +356,7 @@ const styles = StyleSheet.create({
     },
     menuLabel: {
         fontSize: 18,
-
+        color: 'black'
     }
 });
 
