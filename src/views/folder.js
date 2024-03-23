@@ -15,10 +15,10 @@ import { useDispatch, useSelector } from 'react-redux';
 import { writeFile } from '../services/fileService';
 import { clickMenu } from '../redux/actions/menuFolderActions';
 import DocumentPicker from 'react-native-document-picker';
-import fileType from 'react-native-file-type'
+import fileType from 'react-native-file-type';
 import FileViewer from "react-native-file-viewer";
 import { zip } from 'react-native-zip-archive'
-import { shareContent } from '../utils/share';
+import {  shareFile, shareFolder } from '../utils/share';
 import { fileExtensions } from '../utils/fileExtensions';
 
 const Folder = ({ navigation, route }) => {
@@ -62,14 +62,6 @@ const Folder = ({ navigation, route }) => {
         }
     };
 
-    selectedShareFolder = async () => {
-        await shareContent(FOLDERS_DIRECTORY_PATH + folder)
-    }
-
-    selectedShareFile = async () => {
-        await shareContent(currentFile)
-    }
-
     const saveFIle = async (files) => {
         for (const file of files) {
             await writeFile(file.uri, folder, file.name)
@@ -103,6 +95,7 @@ const Folder = ({ navigation, route }) => {
         try {
             const documentDirectory = FOLDERS_DIRECTORY_PATH + folder;
             const contentFolder = await RNFS.readDir(documentDirectory);
+
             let contents = [];
             if (contentFolder) {
                 for (const item of contentFolder) {
@@ -182,7 +175,6 @@ const Folder = ({ navigation, route }) => {
                     <Text numberOfLines={2} style={{ width: 80, height: 30, fontSize: 10, textAlign: 'center', color: 'black' }}>{item.name}</Text>
                 </View>
 
-
             )
         }
 
@@ -221,7 +213,6 @@ const Folder = ({ navigation, route }) => {
     }
 
     useEffect(() => {
-        requestStoragePermission();
         fetchContentInFolder()
         navigation.setParams({ title: folder });
     }, []);
@@ -251,7 +242,7 @@ const Folder = ({ navigation, route }) => {
                         <TouchableOpacity onPress={selectImageHandler}>
                             <Text style={styles.menuLabel}>Import Files</Text>
                         </TouchableOpacity>
-                        <TouchableOpacity onPress={selectedShareFolder}>
+                        <TouchableOpacity onPress={ ()=>shareFolder(FOLDERS_DIRECTORY_PATH + folder)}>
                             <Text style={styles.menuLabel}>Share Folder</Text>
                         </TouchableOpacity>
 
@@ -266,7 +257,9 @@ const Folder = ({ navigation, route }) => {
                         </TouchableOpacity>
                     </View>
                     <View style={{ flexDirection: 'row' }}>
-                        <FontAwesome name="share-alt" size={32} color="black" style={{ marginRight: 20 }} onPress={()=>selectedShareFile()}/>
+                        <FontAwesome name="share-alt" size={32} color="black" style={{ marginRight: 20 }} 
+                            onPress={()=>shareFile(FOLDERS_DIRECTORY_PATH + folder + "/" + currentFile)}
+                        />
                         <Entypo name="edit" size={32} color="black" style={{ marginRight: 20 }} onPress={() => setIsModalRename(true)} />
                         <FontAwesome6 name="trash" size={32} color="black" style={{ marginRight: 20 }} onPress={() => setIsModalDelete(true)} />
                     </View>

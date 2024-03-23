@@ -110,8 +110,12 @@ dependencies {
     implementation project(':react-native-file-viewer')
     implementation project(':react-native-zip-archive')
     implementation project(':react-native-permissions')
+    implementation project(':rn-fetch-blob')
     implementation("com.facebook.react:react-android")
     implementation("com.facebook.react:flipper-integration")
+    implementation project(':react-native-share')
+
+
 
     if (hermesEnabled.toBoolean()) {
         implementation("com.facebook.react:hermes-android")

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Modal, TextInput, Button, StyleSheet } from 'react-native';
 import RNFS from 'react-native-fs'; // Importa react-native-fs
 import { FOLDERS_DIRECTORY_PATH } from '../constant/constants';
+import { renameFileWithExtension } from '../utils/utils';
 
 const RenameFileModal = ({ visible, onClose, folder, file }) => {
 
@@ -10,6 +11,7 @@ const RenameFileModal = ({ visible, onClose, folder, file }) => {
     const handleRenameFile = async () => {
         try {
             await RNFS.moveFile(FOLDERS_DIRECTORY_PATH + folder + '/' + file, FOLDERS_DIRECTORY_PATH + folder + '/' + newFileName);
+            await renameFileWithExtension(FOLDERS_DIRECTORY_PATH + folder + '/' + newFileName);
             setNewFileName(null);
             onClose();
         } catch (error) {
