@@ -17,7 +17,6 @@ import { clickMenu } from '../redux/actions/menuFolderActions';
 import DocumentPicker from 'react-native-document-picker';
 import fileType from 'react-native-file-type';
 import FileViewer from "react-native-file-viewer";
-import { zip } from 'react-native-zip-archive'
 import {  shareFile, shareFolder } from '../utils/share';
 import { fileExtensions } from '../utils/fileExtensions';
 
@@ -224,7 +223,14 @@ const Folder = ({ navigation, route }) => {
     }, [openCamera]);
 
     useEffect(() => {
-        visibleHeadMenu ? hideHeader() : showHeader();
+        if(visibleHeadMenu) {
+            hideHeader();
+            if(isMenuOpen) {
+                dispatch(clickMenu())
+            }
+        } else {
+            showHeader();
+        }
     }, [visibleHeadMenu])
 
     useEffect(() => {

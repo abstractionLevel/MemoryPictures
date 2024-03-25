@@ -1,5 +1,5 @@
 import Share from 'react-native-share';
-import { convertFileToBase64, checkFileType ,convertPdfToBase64} from './utils';
+import { convertFileToBase64, checkFileType, convertPdfToBase64, zipFolder } from './utils';
 
 export const shareFile = async (uri) => {
 
@@ -30,25 +30,29 @@ export const shareFile = async (uri) => {
         .catch((err) => {
             err && console.log(err);
         });
-
-
 }
 
 export const shareFolder = async (uri) => {
-
-    const options = {
-        title: 'Share folder',
-        message: 'Simple share with message',
-        url: `file://${uri}`,
-        subject: "share folder ",
-        failOnCancel: false
-    };
-    Share.open(options)
-        .then((res) => {
-            console.log(res);
+    zipFolder(uri)
+        .then(zipFilePath => {
+            if (zipFilePath) {
+                const options = {
+                    title: 'Share folder',
+                    message: 'Simple share with message',
+                    url: `file://${zipFilePath}`,
+                    subject: "share folder ",
+                    failOnCancel: false
+                };
+                Share.open(options)
+                    .then(async (res) => {
+                        await RNFS.unlink(zipFilePath);
+                    })
+                    .catch((err) => {
+                        err && console.log(err);
+                    });
+            }
         })
-        .catch((err) => {
-            err && console.log(err);
-        });
+        .catch(err => console.log("Errore: ", err))
+
 }
 
