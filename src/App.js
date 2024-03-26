@@ -20,6 +20,27 @@ export default function App() {
 	const handleDispatch = () => {
 		dispatch(clickMenu());
 	}
+
+	// async function requestStoragePermission() {
+
+    //     try {
+    //         const granted = await PermissionsAndroid.requestMultiple([
+    //             PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
+    //             PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+    //         ]);
+    //         if (
+    //             granted['android.permission.READ_EXTERNAL_STORAGE'] === PermissionsAndroid.RESULTS.GRANTED &&
+    //             granted['android.permission.WRITE_EXTERNAL_STORAGE'] === PermissionsAndroid.RESULTS.GRANTED
+    //         ) {
+    //             console.log('Storage permission granted');
+    //         } else {
+    //             console.log('Storage permission denied');
+    //         }
+    //     } catch (err) {
+    //         console.warn('Error requesting storage permission:', err);
+    //     }
+    // }
+
 	
 	useEffect(() => {
 		const getPermissions = async () => {
@@ -42,7 +63,7 @@ export default function App() {
 				<Stack.Screen name="Folder" component={Folder} options={({ route }) => ({
 					headerShown: route.params?.showHeader ?? true,
 					title: route.params?.title ?? 'Default Title',
-					headerTitleStyle: { fontWeight: "bold" },
+					headerTitleStyle: { fontWeight: "bold",color: '#1E90FF' },
 
 					headerRight: () => (
 						<TouchableOpacity onPress={handleDispatch}>

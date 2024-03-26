@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, FlatList, TouchableOpacity, Image, Text, Alert, PermissionsAndroid } from 'react-native';
+import { StyleSheet, View, FlatList, TouchableOpacity, Image, Text } from 'react-native';
 import RNFS from 'react-native-fs';
 import CameraComponent from '../components/cameraComponent';
 import AntDesign from 'react-native-vector-icons/AntDesign';
@@ -16,8 +16,7 @@ import { writeFile } from '../services/fileService';
 import { clickMenu } from '../redux/actions/menuFolderActions';
 import DocumentPicker from 'react-native-document-picker';
 import fileType from 'react-native-file-type';
-import FileViewer from "react-native-file-viewer";
-import {  shareFile, shareFolder } from '../utils/share';
+import { shareFile, shareFolder } from '../utils/share';
 import { fileExtensions } from '../utils/fileExtensions';
 
 const Folder = ({ navigation, route }) => {
@@ -32,7 +31,6 @@ const Folder = ({ navigation, route }) => {
     const [isModalRename, setIsModalRename] = useState(null);
     const [isModalDelete, setIsModalDelete] = useState(null);
     const [currentFile, setCurrentFile] = useState(null);
-    const [selectedImage, setSelectedImage] = useState(null);
     const [loadView, setLoadView] = useState(null);
     const dispatch = useDispatch();
 
@@ -48,7 +46,7 @@ const Folder = ({ navigation, route }) => {
     const selectImageHandler = async () => {
         try {
             const results = await DocumentPicker.pick({
-                type: [DocumentPicker.types.allFiles],
+                type: [DocumentPicker.types.images],
                 allowMultiSelection: true
             });
             saveFIle(results);
@@ -130,15 +128,15 @@ const Folder = ({ navigation, route }) => {
         setCurrentFile(item);
     }
 
-    const openFile = async (filePath) => {
-        FileViewer.open(filePath)
-            .then(() => {
-                console.log('Success');
-            })
-            .catch(_err => {
-                console.log('Errore ', _err);
-            });
-    };
+    // const openFile = async (filePath) => {//other file
+    //     FileViewer.open(filePath)
+    //         .then(() => {
+    //             console.log('Success');
+    //         })
+    //         .catch(_err => {
+    //             console.log('Errore ', _err);
+    //         });
+    // };
 
     const renderImage = ({ item }) => {
         const isImage = fileExtensions.some(ext => ext === item.ext);
@@ -152,30 +150,31 @@ const Folder = ({ navigation, route }) => {
             return (
                 <TouchableOpacity style={{ padding: 2 }}
                     onLongPress={() => onPressHeadMenu(item.name)}
-                    onPress={() => { setOpenImageModal(true); setImageClicked(FOLDERS_DIRECTORY_PATH + folder + "/" + item.name) }}
+                    onPress={() => { setOpenImageModal(true); setImageClicked(FOLDERS_DIRECTORY_PATH + folder + "/" + item.name); setCurrentFile(item.name); }}
                 >
                     <Image source={{ uri: `file://'${FOLDERS_DIRECTORY_PATH + folder + "/" + item.name}` }} style={{ width: 100, height: 100, borderRadius: 10, padding: 0 }} />
                     <Text numberOfLines={2} style={{ width: 80, height: 30, fontSize: 10, textAlign: 'center', color: 'black' }}>{item.name}</Text>
                 </TouchableOpacity>
             )
-        } else {
-            return (
-                <View>
-                    <TouchableOpacity
-                        onPress={() => openFile(FOLDERS_DIRECTORY_PATH + folder + "/" + item.name)}
-                        onLongPress={() => onPressHeadMenu(item.name)} style={{ width: 100, height: 100, borderWidth: 1, borderRadius: 10, alignItems: 'center', justifyContent: 'center' }}
-                    >
-                        <FontAwesome name={
-                            item.ext === 'pdf' ? 'file-pdf-o' :
-                                item.ext === 'XLS' || item.error === 'XLSX' ? 'file-excel-o' :
-                                    item.ext === 'TXT ' ? 'file-text-o' : null} size={40} color="red"
-                        />
-                    </TouchableOpacity>
-                    <Text numberOfLines={2} style={{ width: 80, height: 30, fontSize: 10, textAlign: 'center', color: 'black' }}>{item.name}</Text>
-                </View>
-
-            )
         }
+        // else { //other type  of file
+        //     return (
+        //         <View>
+        //             <TouchableOpacity
+        //                 onPress={() => openFile(FOLDERS_DIRECTORY_PATH + folder + "/" + item.name)}
+        //                 onLongPress={() => onPressHeadMenu(item.name)} style={{ width: 100, height: 100, borderWidth: 1, borderRadius: 10, alignItems: 'center', justifyContent: 'center' }}
+        //             >
+        //                 <FontAwesome name={
+        //                     item.ext === 'pdf' ? 'file-pdf-o' :
+        //                         item.ext === 'XLS' || item.error === 'XLSX' ? 'file-excel-o' :
+        //                             item.ext === 'TXT ' ? 'file-text-o' : null} size={40} color="red"
+        //                 />
+        //             </TouchableOpacity>
+        //             <Text numberOfLines={2} style={{ width: 80, height: 30, fontSize: 10, textAlign: 'center', color: 'black' }}>{item.name}</Text>
+        //         </View>
+
+        //     )
+        // }
 
     }
 
@@ -191,26 +190,6 @@ const Folder = ({ navigation, route }) => {
         </View>)
     }
 
-    async function requestStoragePermission() {
-
-        try {
-            const granted = await PermissionsAndroid.requestMultiple([
-                PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
-                PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
-            ]);
-            if (
-                granted['android.permission.READ_EXTERNAL_STORAGE'] === PermissionsAndroid.RESULTS.GRANTED &&
-                granted['android.permission.WRITE_EXTERNAL_STORAGE'] === PermissionsAndroid.RESULTS.GRANTED
-            ) {
-                console.log('Storage permission granted');
-            } else {
-                console.log('Storage permission denied');
-            }
-        } catch (err) {
-            console.warn('Error requesting storage permission:', err);
-        }
-    }
-
     useEffect(() => {
         fetchContentInFolder()
         navigation.setParams({ title: folder });
@@ -223,9 +202,9 @@ const Folder = ({ navigation, route }) => {
     }, [openCamera]);
 
     useEffect(() => {
-        if(visibleHeadMenu) {
+        if (visibleHeadMenu) {
             hideHeader();
-            if(isMenuOpen) {
+            if (isMenuOpen) {
                 dispatch(clickMenu())
             }
         } else {
@@ -240,6 +219,12 @@ const Folder = ({ navigation, route }) => {
         if (isMenuOpen) dispatch(clickMenu());
     }, [isModalRename, isModalDelete, loadView]);
 
+    useEffect(() => {
+        if(openImageModal) {
+            setVisibleHeadMenu(true)
+        }
+    }, [openImageModal]);
+
     return (
         <View style={styles.container}>
             {isMenuOpen &&
@@ -248,7 +233,7 @@ const Folder = ({ navigation, route }) => {
                         <TouchableOpacity onPress={selectImageHandler}>
                             <Text style={styles.menuLabel}>Import Files</Text>
                         </TouchableOpacity>
-                        <TouchableOpacity onPress={ ()=>shareFolder(FOLDERS_DIRECTORY_PATH + folder)}>
+                        <TouchableOpacity onPress={() => shareFolder(FOLDERS_DIRECTORY_PATH + folder)}>
                             <Text style={styles.menuLabel}>Share Folder</Text>
                         </TouchableOpacity>
 
@@ -259,15 +244,19 @@ const Folder = ({ navigation, route }) => {
                 <View style={styles.headMenu}>
                     <View>
                         <TouchableOpacity onPress={() => setVisibleHeadMenu(false)}>
-                            <AntDesign name="left" size={32} color="black" style={{ marginLeft: 10 }} />
+                            <AntDesign name="left" size={30} color="black" style={{ marginLeft: 10 }} />
                         </TouchableOpacity>
                     </View>
                     <View style={{ flexDirection: 'row' }}>
-                        <FontAwesome name="share-alt" size={32} color="black" style={{ marginRight: 20 }} 
-                            onPress={()=>shareFile(FOLDERS_DIRECTORY_PATH + folder + "/" + currentFile)}
-                        />
-                        <Entypo name="edit" size={32} color="black" style={{ marginRight: 20 }} onPress={() => setIsModalRename(true)} />
-                        <FontAwesome6 name="trash" size={32} color="black" style={{ marginRight: 20 }} onPress={() => setIsModalDelete(true)} />
+                        <TouchableOpacity onPress={() => shareFile(FOLDERS_DIRECTORY_PATH + folder + "/" + currentFile)}>
+                            <FontAwesome name="share-alt" size={30} color="#1E90FF" style={{ marginRight: 30 }} />
+                        </TouchableOpacity>
+                        <TouchableOpacity onPress={() => setIsModalRename(true)}>
+                            <Entypo name="edit" size={30} color="#1E90FF" style={{ marginRight: 30 }} />
+                        </TouchableOpacity>
+                        <TouchableOpacity onPress={() => setIsModalDelete(true)}>
+                            <FontAwesome6 name="trash" size={30} color="#1E90FF" style={{ marginRight: 20 }}  />
+                        </TouchableOpacity>
                     </View>
                 </View>
             }
@@ -291,7 +280,10 @@ const Folder = ({ navigation, route }) => {
             )}
             <FullScreenImageModal
                 isVisible={openImageModal}
-                pathImage={imageClicked} onClose={() => setOpenImageModal(false)}
+                pathImage={imageClicked} 
+                onClose={() => setOpenImageModal(false)}
+                onPressModalRename={()=>setIsModalRename(true)}
+                onPressDeleteImage={()=>setIsModalDelete(true)}
             />
             <RenameFileModal
                 visible={isModalRename}
@@ -304,6 +296,7 @@ const Folder = ({ navigation, route }) => {
                 onClose={() => setIsModalDelete(false)}
                 folder={folder}
                 file={currentFile}
+                onCloseFullScreenImage={() => setOpenImageModal(false)}
             />
         </View>
     )
@@ -324,7 +317,7 @@ const styles = StyleSheet.create({
         marginBottom: 20,
     },
     headMenu: {
-        marginTop: 60,
+        marginTop: 30,
         flexDirection: 'row',
         justifyContent: 'space-between',
         marginBottom: 20,
@@ -354,8 +347,10 @@ const styles = StyleSheet.create({
 
     },
     menuLabel: {
-        fontSize: 18,
-        color: 'black'
+        fontSize: 16,
+        color: 'black',
+        marginBottom: 8,
+        color: '#1E90FF'
     }
 });
 

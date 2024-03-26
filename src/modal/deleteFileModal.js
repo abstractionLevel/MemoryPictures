@@ -3,7 +3,7 @@ import { View, Modal, Text, Button, StyleSheet } from 'react-native';
 import RNFS from 'react-native-fs'; // Importa react-native-fs
 import { FOLDERS_DIRECTORY_PATH } from '../constant/constants';
 
-const DeleteFileModal = ({ visible, onClose, folder, file }) => {
+const DeleteFileModal = ({ visible, onClose, folder, file,onCloseFullScreenImage }) => {
 
     const handleDeleteFile = async () => {
         try {
@@ -12,6 +12,7 @@ const DeleteFileModal = ({ visible, onClose, folder, file }) => {
             if (fileExists) {
                 await RNFS.unlink(filePath); // Elimina il file
                 onClose();
+                onCloseFullScreenImage();
             } else {
                 console.log('Errore', 'Il file non esiste.');
             }
@@ -33,7 +34,7 @@ const DeleteFileModal = ({ visible, onClose, folder, file }) => {
         >
             <View style={styles.modalContainer}>
                 <View style={styles.modalContent}>
-                    <Text style={{color:'black'}}>Are you sure delete file?</Text>
+                    <Text style={{color:'black',marginBottom:10}}>Are you sure delete {file}?</Text>
                     <View style={styles.buttonContainer}>
                         <View style={styles.button}>
                             <Button title="Delete" onPress={handleDeleteFile} />
