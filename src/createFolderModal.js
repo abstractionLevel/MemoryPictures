@@ -24,7 +24,7 @@ const CreateFolderModal = ({ visible, onClose, onCreateFolder }) => {
                     <Text style={styles.modalTitle}>Name of folder</Text>
                     <TextInput
                         style={styles.input}
-                        placeholder="Nome della cartella"
+                        placeholder=""
                         value={folderName}
                         onChangeText={setFolderName}
                     />

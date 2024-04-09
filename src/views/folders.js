@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, View, Button, FlatList, Text, TouchableOpacity } from 'react-native';
 import RNFS from 'react-native-fs';
-import FontAwesome  from 'react-native-vector-icons/FontAwesome';
-import  Entypo from 'react-native-vector-icons/Entypo';
-import AntDesign   from 'react-native-vector-icons/AntDesign';
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
+import Entypo from 'react-native-vector-icons/Entypo';
+import AntDesign from 'react-native-vector-icons/AntDesign';
 import CreateFolderModal from '../createFolderModal';
 import RenameFolderModal from '../modal/renameFolderModal';
 import DeleteFolderModal from '../modal/deleteDirectoryModal';
@@ -18,6 +18,7 @@ const Folders = ({ navigation }) => {
     const [isModalDelete, setIsModalDelete] = useState(false);
     const [currentFolder, setCurrentFolder] = useState(null);
 
+
     const handleCreateFolder = async (folderName) => {
         try {
             const folderPath = FOLDERS_DIRECTORY_PATH + folderName;
@@ -31,7 +32,7 @@ const Folders = ({ navigation }) => {
     const checkAndCreateFolder = async () => {
         try {
             const documentPFolderExists = await RNFS.exists(FOLDERS_DIRECTORY_PATH);
-            
+
             if (!documentPFolderExists) {
                 await RNFS.mkdir(FOLDERS_DIRECTORY_PATH);
             } else {
@@ -46,7 +47,7 @@ const Folders = ({ navigation }) => {
         try {
             const documentPFolders = await RNFS.readDir(FOLDERS_DIRECTORY_PATH);
             const folderNames = documentPFolders.map(folder => folder.name);
-          
+
             setFolders(folderNames);
         } catch (error) {
             console.error('Errore durante il recupero delle cartelle:', error);
@@ -58,11 +59,12 @@ const Folders = ({ navigation }) => {
         setVisibleHeadMenu(true);
     };
 
+
     const renderFolder = ({ item }) => (
         <TouchableOpacity onLongPress={() => onPressHeadMenu(item)} onPress={() => navigation.navigate("Folder", { folder: item })}>
             <View style={styles.folders}>
                 <Entypo style={{ marginLeft: 10 }} name="folder" size={24} color="#1E90FF" />
-                <Text style={{ marginLeft: 10 ,color:"black"}}>{item}</Text>
+                <Text style={{ marginLeft: 10, color: "black" }}>{item}</Text>
             </View>
         </TouchableOpacity>
     );
@@ -80,6 +82,11 @@ const Folders = ({ navigation }) => {
         fetchFolders();
         if (!isModalRename) setVisibleHeadMenu(false);
     }, [isModalRename, isModalDelete]);
+
+    useEffect(() => {
+
+ 
+    }, []);
 
     return (
         <View style={{ flex: 1, marginTop: 10 }}>
@@ -111,7 +118,7 @@ const Folders = ({ navigation }) => {
             )}
             <View style={{ width: '100%', alignItems: 'center', marginTop: 100 }}>
                 <View style={{ width: '50%' }}>
-                    <Button style={{ with: 20 }} title="Add folder" onPress={() => setIsModalVisible(true)} />
+                    <Button style={{ with: 20 }} title="Add folder" onPress={() => inviaFile()} />
                 </View>
             </View>
             <CreateFolderModal
@@ -143,6 +150,24 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         marginBottom: 20,
+    },
+    modalContainer: {
+        flex: 1,
+        // justifyContent: 'center',
+        // alignItems: 'center',
+        marginTop: 22,
+    },
+    folder: {
+        fontSize: 20,
+        padding: 2,
+    },
+    folderTree: {
+        fontSize: 16,
+    },
+    openModalButton: {
+        fontSize: 20,
+        padding: 10,
+        backgroundColor: 'lightblue',
     },
 });
 
