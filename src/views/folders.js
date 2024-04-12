@@ -8,8 +8,11 @@ import CreateFolderModal from '../createFolderModal';
 import RenameFolderModal from '../modal/renameFolderModal';
 import DeleteFolderModal from '../modal/deleteDirectoryModal';
 import { FOLDERS_DIRECTORY_PATH } from '../constant/constants';
+import { connectToAppP } from '../services/fileService';
+import { createFolder } from '../utils/utils';
 
 const Folders = ({ navigation }) => {
+
     const [folders, setFolders] = useState([]);
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [updateView, setUpdateView] = useState(false);
@@ -69,6 +72,11 @@ const Folders = ({ navigation }) => {
         </TouchableOpacity>
     );
 
+ 
+    const connect = () => {
+        connectToAppP();
+    }
+
     useEffect(() => {
         checkAndCreateFolder();
     }, []);
@@ -81,7 +89,7 @@ const Folders = ({ navigation }) => {
     useEffect(() => {
         fetchFolders();
         if (!isModalRename) setVisibleHeadMenu(false);
-    }, [isModalRename, isModalDelete]);
+    }, [isModalRename, isModalDelete,isModalVisible]);
 
     useEffect(() => {
 
@@ -118,13 +126,19 @@ const Folders = ({ navigation }) => {
             )}
             <View style={{ width: '100%', alignItems: 'center', marginTop: 100 }}>
                 <View style={{ width: '50%' }}>
-                    <Button style={{ with: 20 }} title="Add folder" onPress={() => inviaFile()} />
+                    <Button style={{ with: 20 }} title="Add folder" onPress={() => setIsModalVisible(true)} />
+                </View>
+            </View>
+            <View style={{ width: '100%', alignItems: 'center', marginTop: 100 }}>
+                <View style={{ width: '50%' }}>
+                    <Button style={{ with: 20 }} title="Connect" onPress={() => connect()} />
                 </View>
             </View>
             <CreateFolderModal
                 visible={isModalVisible}
                 onClose={() => setIsModalVisible(false)}
-                onCreateFolder={handleCreateFolder}
+                folderPath={currentFolder}
+                onCreateFolder={createFolder}
             />
             <RenameFolderModal
                 visible={isModalRename}

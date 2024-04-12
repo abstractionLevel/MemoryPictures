@@ -4,11 +4,15 @@ import { createStackNavigator } from '@react-navigation/stack';
 import Folders from './views/folders';
 import Folder from './views/folder';
 import { TouchableOpacity } from 'react-native';
+import Feather from 'react-native-vector-icons/Feather';
 import Entypo from 'react-native-vector-icons/Entypo';
 import { useDispatch } from 'react-redux';
 import { clickMenu } from './redux/actions/menuFolderActions';
+import { isInMainDirectory,getValueWithoutLastElement } from './utils/utils';
 // import * as MediaLibrary from "expo-media-library";
 // import { Camera } from 'expo-camera';
+
+
 
 const Stack = createStackNavigator();
 
@@ -23,25 +27,25 @@ export default function App() {
 
 	// async function requestStoragePermission() {
 
-    //     try {
-    //         const granted = await PermissionsAndroid.requestMultiple([
-    //             PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
-    //             PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
-    //         ]);
-    //         if (
-    //             granted['android.permission.READ_EXTERNAL_STORAGE'] === PermissionsAndroid.RESULTS.GRANTED &&
-    //             granted['android.permission.WRITE_EXTERNAL_STORAGE'] === PermissionsAndroid.RESULTS.GRANTED
-    //         ) {
-    //             console.log('Storage permission granted');
-    //         } else {
-    //             console.log('Storage permission denied');
-    //         }
-    //     } catch (err) {
-    //         console.warn('Error requesting storage permission:', err);
-    //     }
-    // }
+	//     try {
+	//         const granted = await PermissionsAndroid.requestMultiple([
+	//             PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
+	//             PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+	//         ]);
+	//         if (
+	//             granted['android.permission.READ_EXTERNAL_STORAGE'] === PermissionsAndroid.RESULTS.GRANTED &&
+	//             granted['android.permission.WRITE_EXTERNAL_STORAGE'] === PermissionsAndroid.RESULTS.GRANTED
+	//         ) {
+	//             console.log('Storage permission granted');
+	//         } else {
+	//             console.log('Storage permission denied');
+	//         }
+	//     } catch (err) {
+	//         console.warn('Error requesting storage permission:', err);
+	//     }
+	// }
 
-	
+
 	useEffect(() => {
 		const getPermissions = async () => {
 			// const { status } = await MediaLibrary.requestPermissionsAsync();
@@ -56,15 +60,22 @@ export default function App() {
 		getPermissions();
 	}, []);
 
+
+
 	return (
 		<NavigationContainer>
 			<Stack.Navigator>
 				<Stack.Screen name="Folders" component={Folders} options={{ title: 'Folders' }} />
-				<Stack.Screen name="Folder" component={Folder} options={({ route }) => ({
+				<Stack.Screen name="Folder" component={Folder} options={({ route,navigation }) => ({
 					headerShown: route.params?.showHeader ?? true,
 					title: route.params?.title ?? 'Default Title',
-					headerTitleStyle: { fontWeight: "bold",color: '#1E90FF' },
-
+					headerTitleStyle: { fontWeight: "bold", color: '#1E90FF' },
+					
+					headerLeft: isInMainDirectory(route.params?.breadcrumb) ? ()=> (
+						<TouchableOpacity onPress={() =>  navigation.navigate("Folder", { folder:getValueWithoutLastElement(route.params?.breadcrumb) })}>
+						  <Feather name="arrow-left" size={28} color="black" />
+						</TouchableOpacity>
+					  ) :undefined,
 					headerRight: () => (
 						<TouchableOpacity onPress={handleDispatch}>
 							<Entypo style={{ marginLeft: 10 }} name="menu" size={40} color="black" />

@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { View, Text, Modal, TextInput, Button, StyleSheet } from 'react-native';
 
-const CreateFolderModal = ({ visible, onClose, onCreateFolder }) => {
+const CreateFolderModal = ({ visible, onClose, onCreateFolder,folderPath }) => {
     const [folderName, setFolderName] = useState('');
 
     const handleCreateFolder = () => {
         if (folderName.trim() !== '') {
-            onCreateFolder(folderName);
+            onCreateFolder(folderPath,folderName);
             setFolderName('');
             onClose();
         }

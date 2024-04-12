@@ -3,6 +3,7 @@ import fileType from 'react-native-file-type';
 import { fileExtensions } from './fileExtensions';
 import RNFetchBlob from 'rn-fetch-blob';
 import { zip } from 'react-native-zip-archive';
+import { FOLDERS_DIRECTORY_PATH } from '../constant/constants';
 
 export const renameFileWithExtension = async (filePath) => {
     try {
@@ -62,3 +63,58 @@ export const zipFolder = async (folderPath) => {
     }
 };
 
+export const getDirectoryTree = async (rootPath) => {
+    const stats = await RNFS.stat(rootPath);
+    if (!stats.isDirectory()) {
+        return null;
+    }
+    const children = await RNFS.readdir(rootPath);
+    const directories = [];
+    for (const child of children) {
+        const childStats = await RNFS.stat(rootPath + '/' + child);
+        if (childStats.isDirectory()) {
+            const directory = {
+                name: child,
+                directories: await getDirectoryTree(rootPath + '/' + child)
+            };
+            directories.push(directory);
+        }
+    }
+    return directories;
+}
+
+
+export const createFolder = async (path, folderName) => {
+    try {
+        const folderPath = FOLDERS_DIRECTORY_PATH + path + '/' + folderName;//todo:nella folders non passo path, gestire il comportamento
+        await RNFS.mkdir(folderPath);
+    } catch (error) {
+        console.error('Errore durante la creazione della cartella:', error);
+    }
+}
+
+
+export const isInMainDirectory = (folder) => {
+    if (folder) {
+        const mainRoute = FOLDERS_DIRECTORY_PATH + folder;
+        const newRoute = cutLastElementAfterSlash(mainRoute);
+        const lastElement = takeLastElementAfterSlash(newRoute);
+        return lastElement === "documentP" ? false : true
+    }
+
+}
+
+const cutLastElementAfterSlash = (value) => {
+    const lastIndexSlash = value.lastIndexOf('/'); 
+    return value.substring(0, lastIndexSlash);
+}
+
+const takeLastElementAfterSlash = (value) => {
+    const lastIndexSlash = value.lastIndexOf('/'); 
+    return value.substring(lastIndexSlash + 1);
+}
+
+export const getValueWithoutLastElement = (value) => {
+    const lastIndexSlash = value.lastIndexOf('/'); 
+   return value.substring(0, lastIndexSlash);
+}

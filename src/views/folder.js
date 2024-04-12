@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, FlatList, TouchableOpacity, Image, Text } from 'react-native';
+import { StyleSheet, View, FlatList, TouchableOpacity, Image, Text, Button } from 'react-native';
 import RNFS from 'react-native-fs';
 import CameraComponent from '../components/cameraComponent';
 import AntDesign from 'react-native-vector-icons/AntDesign';
@@ -18,10 +18,13 @@ import DocumentPicker from 'react-native-document-picker';
 import fileType from 'react-native-file-type';
 import { shareFile, shareFolder } from '../utils/share';
 import { fileExtensions } from '../utils/fileExtensions';
+import { createFolder, cutLastElementAfterSlash, isInMainDirectory } from '../utils/utils';
+import CreateFolderModal from '../createFolderModal';
 
 const Folder = ({ navigation, route }) => {
 
     const folder = route.params.folder;
+    // console.log("sono in foolder ", folder)
     const isMenuOpen = useSelector((state) => state.menuFolder.isOpen);
     const [openCamera, setOpenCamera] = useState(false);
     const [images, setImages] = useState(null);
@@ -32,6 +35,7 @@ const Folder = ({ navigation, route }) => {
     const [isModalDelete, setIsModalDelete] = useState(null);
     const [currentFile, setCurrentFile] = useState(null);
     const [loadView, setLoadView] = useState(null);
+    const [isCreateFolderModal, setIsCreateFolderModal] = useState(false);
     const dispatch = useDispatch();
 
 
@@ -68,6 +72,7 @@ const Folder = ({ navigation, route }) => {
 
     const groupedFotoByDate = (resp) => {
         const uniqueDate = getUniqueDatesFromArray(resp);
+        //ogni data ha un gruppo di file
         let groupedPicture = [];
         uniqueDate.forEach(date => {//per ogni data
             const dateGroup = { date: date, file: [] };//setto la prima data
@@ -89,15 +94,15 @@ const Folder = ({ navigation, route }) => {
     }
 
     const fetchContentInFolder = async () => {
-        try {
-            const documentDirectory = FOLDERS_DIRECTORY_PATH + folder;
-            const contentFolder = await RNFS.readDir(documentDirectory);
 
-            let contents = [];
-            if (contentFolder) {
-                for (const item of contentFolder) {
+        const documentDirectory = FOLDERS_DIRECTORY_PATH + folder;
+        const contentFolder = await RNFS.readDir(documentDirectory);
+        let contents = [];
 
-                    try {
+        if (contentFolder) {
+            for (const item of contentFolder) {
+                try {
+                    if (item.isFile()) {
                         const fileInfo = await RNFS.stat(item.path);
                         const fType = await fileType(item.path).then(type => type.ext)
                         const date = new Date(fileInfo.mtime);
@@ -109,18 +114,21 @@ const Folder = ({ navigation, route }) => {
                                 type: fType
                             })
                         }
-                    } catch (error) {
-                        console.error('Errore durante il recupero delle informazioni del file:', error);
+                    } else {
+                        contents.push({
+                            name: item.name,
+                            date: "",//da inserire un current data
+                            type: "dir"
+                        })
                     }
+                } catch (error) {
+                    console.error('Errore durante il recupero delle informazioni del file:', error);
                 }
             }
-
-            contents.push({ name: "add" })
-            groupedFotoByDate(contents);
-
-        } catch (error) {
-            console.error('Errore durante il recupero delle cartelle:', error);
         }
+
+        contents.push({ name: "add" })
+        groupedFotoByDate(contents);
     };
 
     const onPressHeadMenu = (item) => {
@@ -138,7 +146,8 @@ const Folder = ({ navigation, route }) => {
     //         });
     // };
 
-    const renderImage = ({ item }) => {
+    const renderFile = ({ item }) => {
+
         const isImage = fileExtensions.some(ext => ext === item.ext);
         if (item.name === "add") {
             return (
@@ -153,6 +162,13 @@ const Folder = ({ navigation, route }) => {
                     onPress={() => { setOpenImageModal(true); setImageClicked(FOLDERS_DIRECTORY_PATH + folder + "/" + item.name); setCurrentFile(item.name); }}
                 >
                     <Image source={{ uri: `file://'${FOLDERS_DIRECTORY_PATH + folder + "/" + item.name}` }} style={{ width: 100, height: 100, borderRadius: 10, padding: 0 }} />
+                    <Text numberOfLines={2} style={{ width: 80, height: 30, fontSize: 10, textAlign: 'center', color: 'black' }}>{item.name}</Text>
+                </TouchableOpacity>
+            )
+        } else if (item.ext === "dir") {
+            return (
+                <TouchableOpacity onPress={() => navigation.navigate("Folder", { folder: folder+'/'+item.name })}>
+                    <AntDesign name="folder1" size={100} color="blue" />
                     <Text numberOfLines={2} style={{ width: 80, height: 30, fontSize: 10, textAlign: 'center', color: 'black' }}>{item.name}</Text>
                 </TouchableOpacity>
             )
@@ -183,7 +199,7 @@ const Folder = ({ navigation, route }) => {
             <Text style={styles.date}>{item.date && item.date}</Text>
             <FlatList
                 data={item.file}
-                renderItem={renderImage}
+                renderItem={renderFile}
                 keyExtractor={(item, index) => index.toString()}
                 numColumns={3}
             />
@@ -192,7 +208,13 @@ const Folder = ({ navigation, route }) => {
 
     useEffect(() => {
         fetchContentInFolder()
-        navigation.setParams({ title: folder });
+        navigation.setParams({ title: folder});
+
+
+        return () => {
+            setCurrentFile(null);
+            setImages(null);
+        };
     }, []);
 
     useEffect(() => {
@@ -217,13 +239,18 @@ const Folder = ({ navigation, route }) => {
         if (!isModalRename) setVisibleHeadMenu(false);
         if (loadView) setLoadView(false);
         if (isMenuOpen) dispatch(clickMenu());
-    }, [isModalRename, isModalDelete, loadView]);
+    }, [isModalRename, isModalDelete, loadView, isCreateFolderModal]);
 
     useEffect(() => {
-        if(openImageModal) {
+        if (openImageModal) {
             setVisibleHeadMenu(true)
         }
     }, [openImageModal]);
+
+    useEffect(() => {
+        fetchContentInFolder(); 
+        navigation.setParams({ title: folder,breadcrumb:folder });
+    }, [route.params.folder]);
 
     return (
         <View style={styles.container}>
@@ -255,7 +282,7 @@ const Folder = ({ navigation, route }) => {
                             <Entypo name="edit" size={30} color="#1E90FF" style={{ marginRight: 30 }} />
                         </TouchableOpacity>
                         <TouchableOpacity onPress={() => setIsModalDelete(true)}>
-                            <FontAwesome6 name="trash" size={30} color="#1E90FF" style={{ marginRight: 20 }}  />
+                            <FontAwesome6 name="trash" size={30} color="#1E90FF" style={{ marginRight: 20 }} />
                         </TouchableOpacity>
                     </View>
                 </View>
@@ -278,12 +305,15 @@ const Folder = ({ navigation, route }) => {
                     </View>
                 </View>
             )}
+            <View style={{ width: '50%' }}>
+                <Button style={{ with: 20 }} title="Add folder" onPress={() => setIsCreateFolderModal(true)} />
+            </View>
             <FullScreenImageModal
                 isVisible={openImageModal}
-                pathImage={imageClicked} 
+                pathImage={imageClicked}
                 onClose={() => setOpenImageModal(false)}
-                onPressModalRename={()=>setIsModalRename(true)}
-                onPressDeleteImage={()=>setIsModalDelete(true)}
+                onPressModalRename={() => setIsModalRename(true)}
+                onPressDeleteImage={() => setIsModalDelete(true)}
             />
             <RenameFileModal
                 visible={isModalRename}
@@ -297,6 +327,12 @@ const Folder = ({ navigation, route }) => {
                 folder={folder}
                 file={currentFile}
                 onCloseFullScreenImage={() => setOpenImageModal(false)}
+            />
+            <CreateFolderModal
+                visible={isCreateFolderModal}
+                onClose={() => setIsCreateFolderModal(false)}
+                onCreateFolder={createFolder}
+                folderPath={folder}
             />
         </View>
     )
