@@ -18,13 +18,15 @@ import DocumentPicker from 'react-native-document-picker';
 import fileType from 'react-native-file-type';
 import { shareFile, shareFolder } from '../utils/share';
 import { fileExtensions } from '../utils/fileExtensions';
-import { createFolder, cutLastElementAfterSlash, isInMainDirectory } from '../utils/utils';
+import { createFolder } from '../utils/utils';
 import CreateFolderModal from '../createFolderModal';
+import ToastManager, { Toast } from 'toastify-react-native'
+
 
 const Folder = ({ navigation, route }) => {
 
     const folder = route.params.folder;
-    // console.log("sono in foolder ", folder)
+
     const isMenuOpen = useSelector((state) => state.menuFolder.isOpen);
     const [openCamera, setOpenCamera] = useState(false);
     const [images, setImages] = useState(null);
@@ -167,7 +169,7 @@ const Folder = ({ navigation, route }) => {
             )
         } else if (item.ext === "dir") {
             return (
-                <TouchableOpacity onPress={() => navigation.navigate("Folder", { folder: folder+'/'+item.name })}>
+                <TouchableOpacity onPress={() => navigation.navigate("Folder", { folder: folder + '/' + item.name })}>
                     <AntDesign name="folder1" size={100} color="blue" />
                     <Text numberOfLines={2} style={{ width: 80, height: 30, fontSize: 10, textAlign: 'center', color: 'black' }}>{item.name}</Text>
                 </TouchableOpacity>
@@ -206,10 +208,14 @@ const Folder = ({ navigation, route }) => {
         </View>)
     }
 
+    const showToast = () => {
+        console.log("show toast")
+        Toast.success('🦄 file sent'); 
+    }
+
     useEffect(() => {
         fetchContentInFolder()
-        navigation.setParams({ title: folder});
-
+        navigation.setParams({ title: folder });
 
         return () => {
             setCurrentFile(null);
@@ -242,98 +248,99 @@ const Folder = ({ navigation, route }) => {
     }, [isModalRename, isModalDelete, loadView, isCreateFolderModal]);
 
     useEffect(() => {
-        if (openImageModal) {
-            setVisibleHeadMenu(true)
-        }
-    }, [openImageModal]);
-
-    useEffect(() => {
-        fetchContentInFolder(); 
-        navigation.setParams({ title: folder,breadcrumb:folder });
+        fetchContentInFolder();
+        navigation.setParams({ title: folder, breadcrumb: folder });
     }, [route.params.folder]);
+
 
     return (
         <View style={styles.container}>
-            {isMenuOpen &&
-                <View style={styles.menu}>
-                    <View style={styles.menuContent}>
-                        <TouchableOpacity onPress={selectImageHandler}>
-                            <Text style={styles.menuLabel}>Import Files</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity onPress={() => shareFolder(FOLDERS_DIRECTORY_PATH + folder)}>
-                            <Text style={styles.menuLabel}>Share Folder</Text>
-                        </TouchableOpacity>
+            <ToastManager duration={1200}/>
+            <View style={{ flex: 8 }}>
+                {isMenuOpen &&
+                    <View style={styles.menu}>
+                        <View style={styles.menuContent}>
+                            <TouchableOpacity onPress={selectImageHandler}>
+                                <Text style={styles.menuLabel}>Import Files</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity onPress={() => shareFolder(FOLDERS_DIRECTORY_PATH + folder)}>
+                                <Text style={styles.menuLabel}>Share Folder</Text>
+                            </TouchableOpacity>
 
-                    </View>
-                </View>
-            }
-            {visibleHeadMenu &&
-                <View style={styles.headMenu}>
-                    <View>
-                        <TouchableOpacity onPress={() => setVisibleHeadMenu(false)}>
-                            <AntDesign name="left" size={30} color="black" style={{ marginLeft: 10 }} />
-                        </TouchableOpacity>
-                    </View>
-                    <View style={{ flexDirection: 'row' }}>
-                        <TouchableOpacity onPress={() => shareFile(FOLDERS_DIRECTORY_PATH + folder + "/" + currentFile)}>
-                            <FontAwesome name="share-alt" size={30} color="#1E90FF" style={{ marginRight: 30 }} />
-                        </TouchableOpacity>
-                        <TouchableOpacity onPress={() => setIsModalRename(true)}>
-                            <Entypo name="edit" size={30} color="#1E90FF" style={{ marginRight: 30 }} />
-                        </TouchableOpacity>
-                        <TouchableOpacity onPress={() => setIsModalDelete(true)}>
-                            <FontAwesome6 name="trash" size={30} color="#1E90FF" style={{ marginRight: 20 }} />
-                        </TouchableOpacity>
-                    </View>
-                </View>
-            }
-
-            {openCamera ? (
-                <View style={{ flex: 1 }}>
-                    <CameraComponent folder={folder} onClose={() => setOpenCamera(false)} />
-                </View>
-            ) : (
-                <View style={{ width: '100%', alignItems: 'center' }}>
-                    <View style={{ justifyContent: 'center', width: '90%' }}>
-                        <View style={{ width: '100%', marginTop: 10, alignItems: 'center' }}>
-                            <FlatList
-                                data={images}
-                                renderItem={renderItem}
-                                keyExtractor={(item, index) => index.toString()}
-                            />
                         </View>
                     </View>
-                </View>
-            )}
-            <View style={{ width: '50%' }}>
-                <Button style={{ with: 20 }} title="Add folder" onPress={() => setIsCreateFolderModal(true)} />
+                }
+                {visibleHeadMenu &&
+                    <View style={styles.headMenu}>
+                        <View>
+                            <TouchableOpacity onPress={() => setVisibleHeadMenu(false)}>
+                                <AntDesign name="left" size={30} color="black" style={{ marginLeft: 10 }} />
+                            </TouchableOpacity>
+                        </View>
+                        <View style={{ flexDirection: 'row' }}>
+                            <TouchableOpacity onPress={() => shareFile(FOLDERS_DIRECTORY_PATH + folder + "/" + currentFile)}>
+                                <FontAwesome name="share-alt" size={30} color="#1E90FF" style={{ marginRight: 30 }} />
+                            </TouchableOpacity>
+                            <TouchableOpacity onPress={() => setIsModalRename(true)}>
+                                <Entypo name="edit" size={30} color="#1E90FF" style={{ marginRight: 30 }} />
+                            </TouchableOpacity>
+                            <TouchableOpacity onPress={() => setIsModalDelete(true)}>
+                                <FontAwesome6 name="trash" size={30} color="#1E90FF" style={{ marginRight: 20 }} />
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                }
+
+                {openCamera ? (
+                    <View style={{ flex: 1 }}>
+                        <CameraComponent folder={folder} onClose={() => setOpenCamera(false)} />
+                    </View>
+                ) : (
+                    <View style={{ width: '100%', alignItems: 'center' }}>
+                        <View style={{ justifyContent: 'center', width: '90%' }}>
+                            <View style={{ width: '100%', marginTop: 10, alignItems: 'center' }}>
+                                <FlatList
+                                    data={images}
+                                    renderItem={renderItem}
+                                    keyExtractor={(item, index) => index.toString()}
+                                />
+                            </View>
+                        </View>
+                    </View>
+                )}
+                <FullScreenImageModal
+                    isVisible={openImageModal}
+                    pathImage={imageClicked}
+                    onClose={() => setOpenImageModal(false)}
+                    onPressModalRename={() => setIsModalRename(true)}
+                    onPressDeleteImage={() => setIsModalDelete(true)}
+                    showToast={()=>showToast()}
+                />
+                <RenameFileModal
+                    visible={isModalRename}
+                    onClose={() => setIsModalRename(false)}
+                    file={currentFile}
+                    folder={folder}
+                />
+                <DeleteFileModal
+                    visible={isModalDelete}
+                    onClose={() => setIsModalDelete(false)}
+                    folder={folder}
+                    file={currentFile}
+                    onCloseFullScreenImage={() => setOpenImageModal(false)}
+                />
+                <CreateFolderModal
+                    visible={isCreateFolderModal}
+                    onClose={() => setIsCreateFolderModal(false)}
+                    onCreateFolder={createFolder}
+                    folderPath={folder}
+                />
             </View>
-            <FullScreenImageModal
-                isVisible={openImageModal}
-                pathImage={imageClicked}
-                onClose={() => setOpenImageModal(false)}
-                onPressModalRename={() => setIsModalRename(true)}
-                onPressDeleteImage={() => setIsModalDelete(true)}
-            />
-            <RenameFileModal
-                visible={isModalRename}
-                onClose={() => setIsModalRename(false)}
-                file={currentFile}
-                folder={folder}
-            />
-            <DeleteFileModal
-                visible={isModalDelete}
-                onClose={() => setIsModalDelete(false)}
-                folder={folder}
-                file={currentFile}
-                onCloseFullScreenImage={() => setOpenImageModal(false)}
-            />
-            <CreateFolderModal
-                visible={isCreateFolderModal}
-                onClose={() => setIsCreateFolderModal(false)}
-                onCreateFolder={createFolder}
-                folderPath={folder}
-            />
+            <View style={{ flex: 2 }}>
+                <View style={{ width: '50%', alignSelf: 'center', marginTop: 30 }}>
+                    <Button style={{ with: 20 }} title="Add folder" onPress={() => setIsCreateFolderModal(true)} />
+                </View>
+            </View>
         </View>
     )
 }

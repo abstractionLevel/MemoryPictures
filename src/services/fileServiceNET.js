@@ -8,37 +8,71 @@ const socket = io(IP_SERVER_APP, {
     query: { clientId: "rect-native-12" }
 });
 
-export const fetchDirectories = () => {
-    return new Promise((resolve, reject) => {
-        socket.emit('getTirectoryTree');
-        socket.on('directoryTree', async (directoryTree) => {
-            const directories = await directoryTree.filter(item => item);
-            resolve(directories);
+const fileServiceNET = {
+
+    fetchDirectories: () => {
+        return new Promise((resolve, reject) => {
+            socket.emit('getTirectoryTree');
+            socket.on('directoryTree', async (directoryTree) => {
+                const directories = await directoryTree.filter(item => item);
+                resolve(directories);
+            });
         });
-    });
-};
+    },
 
-export const sendFileToApp = async (remotePah) => {
-    const filePath = '/data/user/0/com.memorypictures/files/documentP/documenti/estate/televisione1.jpg';
-    const fileContent = await RNFS.readFile(filePath, 'base64');
-    socket.emit('file', {
-        filename: 'televisione.jpg',
-        content: fileContent,
-        pathOfFile: remotePah
-    });
-
-    return new Promise(async (resolve, reject) => {
-        socket.on('fileRecivied', () => {
-            resolve("file recivied");
+    sendFile: async (remotePah) => {
+        const filePath = '/data/user/0/com.memorypictures/files/documentP/documenti/estate/televisione1.jpg';
+        const fileContent = await RNFS.readFile(filePath, 'base64');
+        socket.emit('file', {
+            filename: 'televisione.jpg',
+            content: fileContent,
+            pathOfFile: remotePah
         });
-        socket.on('error', (error) => {
-            reject("Error: ", error);
+
+        return new Promise(async (resolve, reject) => {
+            socket.on('fileRecivied', () => {
+                resolve("file recivied");
+            });
+            socket.on('error', (error) => {
+                reject("Error: ", error);
+            });
         });
-    })
+    },
+
+}
+
+export default fileServiceNET;
+
+// export const fetchDirectories = () => {
+//     return new Promise((resolve, reject) => {
+//         socket.emit('getTirectoryTree');
+//         socket.on('directoryTree', async (directoryTree) => {
+//             const directories = await directoryTree.filter(item => item);
+//             resolve(directories);
+//         });
+//     });
+// };
+
+// export const sendFile = async (remotePah) => {
+//     const filePath = '/data/user/0/com.memorypictures/files/documentP/documenti/estate/televisione1.jpg';
+//     const fileContent = await RNFS.readFile(filePath, 'base64');
+//     socket.emit('file', {
+//         filename: 'televisione.jpg',
+//         content: fileContent,
+//         pathOfFile: remotePah
+//     });
+
+//     return new Promise(async (resolve, reject) => {
+//         socket.on('fileRecivied', () => {
+//             resolve("file recivied");
+//         });
+//         socket.on('error', (error) => {
+//             reject("Error: ", error);
+//         });
+//     })
 
 
-
-};
+// };
 
 export const connectToAppP = () => {
     return new Promise((resolve, reject) => {

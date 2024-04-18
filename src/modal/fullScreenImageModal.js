@@ -1,13 +1,13 @@
 import React, { useEffect, useState, } from 'react';
-import { View, Image, Modal, StyleSheet, TouchableOpacity, FlatList, Text, Alert } from 'react-native';
+import { View, Image, Modal, StyleSheet, TouchableOpacity, FlatList, Text, Alert, Button } from 'react-native';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import Entypo from 'react-native-vector-icons/Entypo';
 import { shareFile } from '../utils/share';
-import { fetchDirectories, sendFileToApp } from '../services/fileServiceNET';
+import fileServiceNET from '../services/fileServiceNET';
 
-const FullScreenImageModal = ({ isVisible, pathImage, onClose, onPressModalRename, onPressDeleteImage }) => {
+const FullScreenImageModal = ({ isVisible, pathImage, onClose, onPressModalRename, onPressDeleteImage, showToast }) => {
 
     const [directories, setDirectories] = useState(null);
     const [isModalDirectories, setIsModalDirectories] = useState(false);
@@ -16,7 +16,7 @@ const FullScreenImageModal = ({ isVisible, pathImage, onClose, onPressModalRenam
 
     const getDirectoriesFromDeskApp = async () => {
         try {
-            const directories = await fetchDirectories();
+            const directories = await fileServiceNET.fetchDirectories();
             setDirectories(directories);
         } catch (err) {
             console.log(err);
@@ -43,10 +43,12 @@ const FullScreenImageModal = ({ isVisible, pathImage, onClose, onPressModalRenam
 
     const sendFile = async (remotePah) => {
         try {
-            const res = await sendFileToApp(remotePah);
+            const res = await fileServiceNET.sendFile(remotePah);
             //todo:implementare una notifica con resp ok
             if (res) {
                 setIsModalDirectories(false);
+                showToast();
+
             }
         } catch (err) {
             //todo:implementare una notifica con resp ko
@@ -68,7 +70,6 @@ const FullScreenImageModal = ({ isVisible, pathImage, onClose, onPressModalRenam
         if (directories) {
             onClose();
             setIsModalDirectories(true);
-
         }
     }, [directories])
 
@@ -107,6 +108,9 @@ const FullScreenImageModal = ({ isVisible, pathImage, onClose, onPressModalRenam
                 animationType="slide"
                 onRequestClose={() => setIsModalDirectories(false)}
             >
+                <View>
+                    <Text style={{ textAlign: 'center', marginTop: 30, fontSize: 30 }}>Chose Directory</Text>
+                </View>
                 <View style={styles.modalDirectories}>
                     <FlatList
                         data={directories}
@@ -121,6 +125,9 @@ const FullScreenImageModal = ({ isVisible, pathImage, onClose, onPressModalRenam
                         )}
                         keyExtractor={(item) => item.name}
                     />
+                </View>
+                <View style={{ width: '50%', alignSelf: 'center', marginBottom: 30 }}>
+                    <Button title="Close" onPress={() => setIsModalDirectories(false)} />
                 </View>
             </Modal>
             {confirmSendFile && (
@@ -181,6 +188,7 @@ const styles = StyleSheet.create({
     folder: {
         fontSize: 20,
         padding: 2,
+        marginLeft: 10,
     },
     folderTree: {
         fontSize: 16,
