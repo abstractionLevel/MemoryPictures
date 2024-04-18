@@ -5,21 +5,21 @@ import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import Entypo from 'react-native-vector-icons/Entypo';
 import { shareFile } from '../utils/share';
-import { connectToApp ,sendFileToApp} from '../services/fileService';
+import { fetchDirectories, sendFileToApp } from '../services/fileServiceNET';
 
 const FullScreenImageModal = ({ isVisible, pathImage, onClose, onPressModalRename, onPressDeleteImage }) => {
 
     const [directories, setDirectories] = useState(null);
     const [isModalDirectories, setIsModalDirectories] = useState(false);
-    const [confirmSendFile ,setConfirmSendFile] = useState(false);
-    const [currentRemotePath,setCurrentRemotePath] = useState(null);
+    const [confirmSendFile, setConfirmSendFile] = useState(false);
+    const [currentRemotePath, setCurrentRemotePath] = useState(null);
 
-    const fetchDirectories = async () => {
+    const getDirectoriesFromDeskApp = async () => {
         try {
-            const directories = await connectToApp();
+            const directories = await fetchDirectories();
             setDirectories(directories);
         } catch (err) {
-            setError(err);
+            console.log(err);
         }
     };
 
@@ -28,7 +28,7 @@ const FullScreenImageModal = ({ isVisible, pathImage, onClose, onPressModalRenam
         return tree.map((item, index) => {
             return (
                 <View key={index}>
-                    <TouchableOpacity onPress={() => handleConfirm(path) }>
+                    <TouchableOpacity onPress={() => handleConfirm(path)}>
                         <View style={{ fontSize: 18, marginLeft: spc }}>
                             <Text>|</Text>
                             <Text style={{ fontSize: 16 }}>{item.name}</Text>
@@ -44,11 +44,12 @@ const FullScreenImageModal = ({ isVisible, pathImage, onClose, onPressModalRenam
     const sendFile = async (remotePah) => {
         try {
             const res = await sendFileToApp(remotePah);
-            console.log(res)
             //todo:implementare una notifica con resp ok
-            setIsModalDirectories(false);
+            if (res) {
+                setIsModalDirectories(false);
+            }
         } catch (err) {
-             //todo:implementare una notifica con resp ko
+            //todo:implementare una notifica con resp ko
             setIsModalDirectories(false);
         }
     };
@@ -94,7 +95,7 @@ const FullScreenImageModal = ({ isVisible, pathImage, onClose, onPressModalRenam
                         <TouchableOpacity onPress={onPressDeleteImage}>
                             <FontAwesome6 name="trash" size={20} color="white" style={{ marginRight: 20 }} />
                         </TouchableOpacity>
-                        <TouchableOpacity onPress={fetchDirectories}>
+                        <TouchableOpacity onPress={getDirectoriesFromDeskApp}>
                             <AntDesign name="upload" size={20} color="white" style={{ marginRight: 20 }} />
                         </TouchableOpacity>
                     </View>

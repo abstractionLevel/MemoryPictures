@@ -85,8 +85,15 @@ export const getDirectoryTree = async (rootPath) => {
 
 
 export const createFolder = async (path, folderName) => {
+    let folderPath = null
     try {
-        const folderPath = FOLDERS_DIRECTORY_PATH + path + '/' + folderName;//todo:nella folders non passo path, gestire il comportamento
+        if (path) {
+            folderPath = FOLDERS_DIRECTORY_PATH + path + '/' + folderName;
+
+        } else {
+            folderPath = FOLDERS_DIRECTORY_PATH + '/' + folderName;
+
+        }
         await RNFS.mkdir(folderPath);
     } catch (error) {
         console.error('Errore durante la creazione della cartella:', error);
@@ -105,16 +112,16 @@ export const isInMainDirectory = (folder) => {
 }
 
 const cutLastElementAfterSlash = (value) => {
-    const lastIndexSlash = value.lastIndexOf('/'); 
+    const lastIndexSlash = value.lastIndexOf('/');
     return value.substring(0, lastIndexSlash);
 }
 
 const takeLastElementAfterSlash = (value) => {
-    const lastIndexSlash = value.lastIndexOf('/'); 
+    const lastIndexSlash = value.lastIndexOf('/');
     return value.substring(lastIndexSlash + 1);
 }
 
 export const getValueWithoutLastElement = (value) => {
-    const lastIndexSlash = value.lastIndexOf('/'); 
-   return value.substring(0, lastIndexSlash);
+    const lastIndexSlash = value.lastIndexOf('/');
+    return value.substring(0, lastIndexSlash);
 }

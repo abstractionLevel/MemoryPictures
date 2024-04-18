@@ -12,7 +12,7 @@ import DeleteFileModal from '../modal/deleteFileModal';
 import { FOLDERS_DIRECTORY_PATH } from '../constant/constants';
 import { getUniqueDatesFromArray } from '../utils/date';
 import { useDispatch, useSelector } from 'react-redux';
-import { writeFile } from '../services/fileService';
+import { writeFile } from '../services/fileServiceIO';
 import { clickMenu } from '../redux/actions/menuFolderActions';
 import DocumentPicker from 'react-native-document-picker';
 import fileType from 'react-native-file-type';

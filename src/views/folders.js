@@ -8,7 +8,7 @@ import CreateFolderModal from '../createFolderModal';
 import RenameFolderModal from '../modal/renameFolderModal';
 import DeleteFolderModal from '../modal/deleteDirectoryModal';
 import { FOLDERS_DIRECTORY_PATH } from '../constant/constants';
-import { connectToAppP } from '../services/fileService';
+import { connectToAppP } from '../services/fileServiceNET';
 import { createFolder } from '../utils/utils';
 
 const Folders = ({ navigation }) => {
@@ -22,15 +22,15 @@ const Folders = ({ navigation }) => {
     const [currentFolder, setCurrentFolder] = useState(null);
 
 
-    const handleCreateFolder = async (folderName) => {
-        try {
-            const folderPath = FOLDERS_DIRECTORY_PATH + folderName;
-            await RNFS.mkdir(folderPath);
-            setUpdateView(true);
-        } catch (error) {
-            console.error('Errore durante la creazione della cartella:', error);
-        }
-    };
+    // const handleCreateFolder = async (folderName) => {
+    //     try {
+    //         const folderPath = FOLDERS_DIRECTORY_PATH + folderName;
+    //         await RNFS.mkdir(folderPath);
+    //         setUpdateView(true);
+    //     } catch (error) {
+    //         console.error('Errore durante la creazione della cartella:', error);
+    //     }
+    // };
 
     const checkAndCreateFolder = async () => {
         try {
@@ -57,14 +57,14 @@ const Folders = ({ navigation }) => {
         }
     };
 
-    const onPressHeadMenu = (item) => {
+    const onPressFolder = (item) => {
         setCurrentFolder(item);
         setVisibleHeadMenu(true);
     };
 
 
     const renderFolder = ({ item }) => (
-        <TouchableOpacity onLongPress={() => onPressHeadMenu(item)} onPress={() => navigation.navigate("Folder", { folder: item })}>
+        <TouchableOpacity onLongPress={() => onPressFolder(item)} onPress={() => navigation.navigate("Folder", { folder: item })}>
             <View style={styles.folders}>
                 <Entypo style={{ marginLeft: 10 }} name="folder" size={24} color="#1E90FF" />
                 <Text style={{ marginLeft: 10, color: "black" }}>{item}</Text>
@@ -137,7 +137,7 @@ const Folders = ({ navigation }) => {
             <CreateFolderModal
                 visible={isModalVisible}
                 onClose={() => setIsModalVisible(false)}
-                folderPath={currentFolder}
+                folderPath={null}
                 onCreateFolder={createFolder}
             />
             <RenameFolderModal

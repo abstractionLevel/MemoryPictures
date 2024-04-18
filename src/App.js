@@ -68,7 +68,7 @@ export default function App() {
 				<Stack.Screen name="Folders" component={Folders} options={{ title: 'Folders' }} />
 				<Stack.Screen name="Folder" component={Folder} options={({ route,navigation }) => ({
 					headerShown: route.params?.showHeader ?? true,
-					title: route.params?.title ?? 'Default Title',
+					title: route.params?.title ?? '',
 					headerTitleStyle: { fontWeight: "bold", color: '#1E90FF' },
 					
 					headerLeft: isInMainDirectory(route.params?.breadcrumb) ? ()=> (

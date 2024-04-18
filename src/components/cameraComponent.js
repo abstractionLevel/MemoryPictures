@@ -6,7 +6,7 @@ import Feather from 'react-native-vector-icons/Feather';
 import { FOLDERS_DIRECTORY_PATH } from '../constant/constants';
 import { Camera, useCameraDevices } from 'react-native-vision-camera';
 import RNFS from 'react-native-fs';
-import { writeFile } from '../services/fileService';
+import { writeFile } from '../services/fileServiceIO';
 
 const CameraComponent = ({ folder, onClose }) => {
 
