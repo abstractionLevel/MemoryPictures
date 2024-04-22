@@ -72,13 +72,13 @@ const Folder = ({ navigation, route }) => {
         setLoadView(true);
     }
 
-    const groupedFotoByDate = (resp) => {
+    const groupedElementByDate = (resp) => {
         const uniqueDate = getUniqueDatesFromArray(resp);
         //ogni data ha un gruppo di file
         let groupedPicture = [];
         uniqueDate.forEach(date => {//per ogni data
             const dateGroup = { date: date, file: [] };//setto la prima data
-            resp.forEach(item => {//itero l array d immagini
+            resp.forEach(item => {//itero l array d immagin
                 if (date === item.date) {
                     dateGroup.file.push({ name: item.name, ext: item.type });//setto l immagine che combacia con la data
                 }
@@ -119,7 +119,7 @@ const Folder = ({ navigation, route }) => {
                     } else {
                         contents.push({
                             name: item.name,
-                            date: "",//da inserire un current data
+                            date: new Date().toLocaleDateString(),
                             type: "dir"
                         })
                     }
@@ -130,7 +130,7 @@ const Folder = ({ navigation, route }) => {
         }
 
         contents.push({ name: "add" })
-        groupedFotoByDate(contents);
+        groupedElementByDate(contents);
     };
 
     const onPressHeadMenu = (item) => {
@@ -153,13 +153,13 @@ const Folder = ({ navigation, route }) => {
         const isImage = fileExtensions.some(ext => ext === item.ext);
         if (item.name === "add") {
             return (
-                <TouchableOpacity style={{ width: 100, height: 100, borderWidth: 1, borderRadius: 10, alignItems: 'center', justifyContent: 'center' }} onPress={() => setOpenCamera(true)}>
+                <TouchableOpacity style={{ width: 100, height: 100, borderWidth: 1, borderRadius: 10, alignItems: 'center', justifyContent: 'center' ,padding:10}} onPress={() => setOpenCamera(true)}>
                     <AntDesign name="pluscircleo" size={40} color="black" />
                 </TouchableOpacity>
             )
         } else if (isImage) {
             return (
-                <TouchableOpacity style={{ padding: 2 }}
+                <TouchableOpacity style={{ padding: 10 }}
                     onLongPress={() => onPressHeadMenu(item.name)}
                     onPress={() => { setOpenImageModal(true); setImageClicked(FOLDERS_DIRECTORY_PATH + folder + "/" + item.name); setCurrentFile(item.name); }}
                 >
@@ -169,8 +169,8 @@ const Folder = ({ navigation, route }) => {
             )
         } else if (item.ext === "dir") {
             return (
-                <TouchableOpacity onPress={() => navigation.navigate("Folder", { folder: folder + '/' + item.name })}>
-                    <AntDesign name="folder1" size={100} color="blue" />
+                <TouchableOpacity style={{padding:10}} onPress={() => navigation.navigate("Folder", { folder: folder + '/' + item.name })}>
+                    <AntDesign name="folder1" size={100} color="#1E90FF" />
                     <Text numberOfLines={2} style={{ width: 80, height: 30, fontSize: 10, textAlign: 'center', color: 'black' }}>{item.name}</Text>
                 </TouchableOpacity>
             )
@@ -197,7 +197,7 @@ const Folder = ({ navigation, route }) => {
     }
 
     const renderItem = ({ item }) => {
-        return (<View>
+        return (<View >
             <Text style={styles.date}>{item.date && item.date}</Text>
             <FlatList
                 data={item.file}
@@ -209,8 +209,7 @@ const Folder = ({ navigation, route }) => {
     }
 
     const showToast = () => {
-        console.log("show toast")
-        Toast.success('🦄 file sent'); 
+        Toast.success('🦄 file sent');
     }
 
     useEffect(() => {
@@ -255,7 +254,7 @@ const Folder = ({ navigation, route }) => {
 
     return (
         <View style={styles.container}>
-            <ToastManager duration={1200}/>
+            <ToastManager duration={1200} />
             <View style={{ flex: 8 }}>
                 {isMenuOpen &&
                     <View style={styles.menu}>
@@ -314,7 +313,7 @@ const Folder = ({ navigation, route }) => {
                     onClose={() => setOpenImageModal(false)}
                     onPressModalRename={() => setIsModalRename(true)}
                     onPressDeleteImage={() => setIsModalDelete(true)}
-                    showToast={()=>showToast()}
+                    showToast={() => showToast()}
                 />
                 <RenameFileModal
                     visible={isModalRename}
@@ -336,11 +335,14 @@ const Folder = ({ navigation, route }) => {
                     folderPath={folder}
                 />
             </View>
-            <View style={{ flex: 2 }}>
-                <View style={{ width: '50%', alignSelf: 'center', marginTop: 30 }}>
-                    <Button style={{ with: 20 }} title="Add folder" onPress={() => setIsCreateFolderModal(true)} />
+            {!openCamera &&
+                <View style={{ flex: 2 }}>
+                    <View style={{ width: '50%', alignSelf: 'center', marginTop: 30 }}>
+                        <Button style={{ with: 20 }} title="Add folder" onPress={() => setIsCreateFolderModal(true)} />
+                    </View>
                 </View>
-            </View>
+            }
+
         </View>
     )
 }
