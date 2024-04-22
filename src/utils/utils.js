@@ -40,7 +40,9 @@ export const checkFileType = async (filePath) => {
                 return 'pdf';
             } else if (type.ext.includes('zip')) {
                 return 'zip';
-            } else {
+            } else if (type.ext.includes('dir')) {
+                return 'dir';
+            }  else {
                 return 'altro';
             }
         })
@@ -125,3 +127,8 @@ export const getValueWithoutLastElement = (value) => {
     const lastIndexSlash = value.lastIndexOf('/');
     return value.substring(0, lastIndexSlash);
 }
+
+export const getFileNameFromPath =  (path) => {
+    let lastIndex = path.lastIndexOf("/");
+    return   path.substring(lastIndex + 1);
+  };

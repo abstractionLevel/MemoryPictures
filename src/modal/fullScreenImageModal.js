@@ -43,7 +43,7 @@ const FullScreenImageModal = ({ isVisible, pathImage, onClose, onPressModalRenam
 
     const sendFile = async (remotePah) => {
         try {
-            const res = await fileServiceNET.sendFile(remotePah);
+            const res = await fileServiceNET.sendFile(remotePah,pathImage);
             //todo:implementare una notifica con resp ok
             if (res) {
                 setIsModalDirectories(false);

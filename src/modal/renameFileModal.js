@@ -1,17 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import { View, Modal, TextInput, Button, StyleSheet } from 'react-native';
-import RNFS from 'react-native-fs'; // Importa react-native-fs
+import RNFS from 'react-native-fs';
 import { FOLDERS_DIRECTORY_PATH } from '../constant/constants';
-import { renameFileWithExtension } from '../utils/utils';
+import { checkFileType, renameFileWithExtension } from '../utils/utils';
 
 const RenameFileModal = ({ visible, onClose, folder, file }) => {
 
     const [newFileName, setNewFileName] = useState(null);
 
     const handleRenameFile = async () => {
-        try {
+        try {           
+            const stats = await RNFS.stat(FOLDERS_DIRECTORY_PATH + folder + '/' + file);
             await RNFS.moveFile(FOLDERS_DIRECTORY_PATH + folder + '/' + file, FOLDERS_DIRECTORY_PATH + folder + '/' + newFileName);
-            await renameFileWithExtension(FOLDERS_DIRECTORY_PATH + folder + '/' + newFileName);
+            if (!stats.isDirectory()) {
+                await renameFileWithExtension(FOLDERS_DIRECTORY_PATH + folder + '/' + newFileName);//gli aggiungo l'estenzione al file
+            }
             setNewFileName(null);
             onClose();
         } catch (error) {
@@ -84,7 +87,7 @@ const styles = StyleSheet.create({
         borderRadius: 5,
         padding: 10,
         marginBottom: 10,
-        color:'black'
+        color: 'black'
     },
     buttonContainer: {
         flexDirection: 'row',
@@ -93,7 +96,7 @@ const styles = StyleSheet.create({
     },
     button: {
         flex: 1,
-        marginHorizontal: 5, 
+        marginHorizontal: 5,
     },
 });
 

@@ -2,7 +2,7 @@ import { FOLDERS_DIRECTORY_PATH } from "../constant/constants";
 import RNFS from 'react-native-fs';
 import { io } from "socket.io-client";
 import { IP_SERVER_APP } from '../constant/constants';
-import { getDirectoryTree } from "../utils/utils";
+import { getDirectoryTree, getFileNameFromPath } from "../utils/utils";
 
 const socket = io(IP_SERVER_APP, {
     query: { clientId: "rect-native-12" }
@@ -20,11 +20,14 @@ const fileServiceNET = {
         });
     },
 
-    sendFile: async (remotePah) => {
-        const filePath = '/data/user/0/com.memorypictures/files/documentP/documenti/estate/televisione1.jpg';
-        const fileContent = await RNFS.readFile(filePath, 'base64');
+    sendFile: async (remotePah,pathImage) => {
+        const fileContent = await RNFS.readFile(pathImage, 'base64');
+        // let lastIndex = pathImage.lastIndexOf("/");
+        // const fileName = pathImage.substring(lastIndex + 1);
+        const fileName =  getFileNameFromPath(pathImage)
+        console.log("filename: ", fileName)
         socket.emit('file', {
-            filename: 'televisione.jpg',
+            filename: fileName,
             content: fileContent,
             pathOfFile: remotePah
         });

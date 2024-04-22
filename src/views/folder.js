@@ -37,6 +37,7 @@ const Folder = ({ navigation, route }) => {
     const [isModalDelete, setIsModalDelete] = useState(null);
     const [currentFile, setCurrentFile] = useState(null);
     const [loadView, setLoadView] = useState(null);
+    const [isDirectory, setIsDirectory] = useState(false);
     const [isCreateFolderModal, setIsCreateFolderModal] = useState(false);
     const dispatch = useDispatch();
 
@@ -133,27 +134,21 @@ const Folder = ({ navigation, route }) => {
         groupedElementByDate(contents);
     };
 
-    const onPressHeadMenu = (item) => {
+    const onPressHeadMenu = async (item) => {
+        const stats = await RNFS.stat(FOLDERS_DIRECTORY_PATH + folder + "/" + item);
+        if (stats.isDirectory()) {
+            setIsDirectory(true);
+        }
         setVisibleHeadMenu(true);
         setCurrentFile(item);
     }
-
-    // const openFile = async (filePath) => {//other file
-    //     FileViewer.open(filePath)
-    //         .then(() => {
-    //             console.log('Success');
-    //         })
-    //         .catch(_err => {
-    //             console.log('Errore ', _err);
-    //         });
-    // };
 
     const renderFile = ({ item }) => {
 
         const isImage = fileExtensions.some(ext => ext === item.ext);
         if (item.name === "add") {
             return (
-                <TouchableOpacity style={{ width: 100, height: 100, borderWidth: 1, borderRadius: 10, alignItems: 'center', justifyContent: 'center' ,padding:10}} onPress={() => setOpenCamera(true)}>
+                <TouchableOpacity style={{ width: 100, height: 100, borderWidth: 1, borderRadius: 10, alignItems: 'center', justifyContent: 'center', padding: 10 }} onPress={() => setOpenCamera(true)}>
                     <AntDesign name="pluscircleo" size={40} color="black" />
                 </TouchableOpacity>
             )
@@ -169,7 +164,10 @@ const Folder = ({ navigation, route }) => {
             )
         } else if (item.ext === "dir") {
             return (
-                <TouchableOpacity style={{padding:10}} onPress={() => navigation.navigate("Folder", { folder: folder + '/' + item.name })}>
+                <TouchableOpacity style={{ padding: 10 }}
+                    onPress={() => navigation.navigate("Folder", { folder: folder + '/' + item.name })}
+                    onLongPress={() => onPressHeadMenu(item.name)}
+                >
                     <AntDesign name="folder1" size={100} color="#1E90FF" />
                     <Text numberOfLines={2} style={{ width: 80, height: 30, fontSize: 10, textAlign: 'center', color: 'black' }}>{item.name}</Text>
                 </TouchableOpacity>
@@ -277,6 +275,11 @@ const Folder = ({ navigation, route }) => {
                             </TouchableOpacity>
                         </View>
                         <View style={{ flexDirection: 'row' }}>
+                            { isDirectory &&
+                                <TouchableOpacity onPress={() => shareFile(FOLDERS_DIRECTORY_PATH + folder + "/" + currentFile)}>
+                                    <AntDesign name="upload" size={30} color="#1E90FF" style={{ marginRight: 30 }} />
+                                </TouchableOpacity>
+                            }
                             <TouchableOpacity onPress={() => shareFile(FOLDERS_DIRECTORY_PATH + folder + "/" + currentFile)}>
                                 <FontAwesome name="share-alt" size={30} color="#1E90FF" style={{ marginRight: 30 }} />
                             </TouchableOpacity>
