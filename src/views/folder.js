@@ -26,6 +26,7 @@ import ToastManager, { Toast } from 'toastify-react-native'
 const Folder = ({ navigation, route }) => {
 
     const folder = route.params.folder;
+    
 
     const isMenuOpen = useSelector((state) => state.menuFolder.isOpen);
     const [openCamera, setOpenCamera] = useState(false);
@@ -73,7 +74,7 @@ const Folder = ({ navigation, route }) => {
         setLoadView(true);
     }
 
-    const groupedElementByDate = (resp) => {
+    const sortElementByDate = (resp) => {
         const uniqueDate = getUniqueDatesFromArray(resp);
         //ogni data ha un gruppo di file
         let groupedPicture = [];
@@ -131,7 +132,7 @@ const Folder = ({ navigation, route }) => {
         }
 
         contents.push({ name: "add" })
-        groupedElementByDate(contents);
+        sortElementByDate(contents);
     };
 
     const onPressHeadMenu = async (item) => {
@@ -166,7 +167,7 @@ const Folder = ({ navigation, route }) => {
             return (
                 <TouchableOpacity style={{ padding: 10 }}
                     onPress={() => navigation.navigate("Folder", { folder: folder + '/' + item.name })}
-                    onLongPress={() => onPressHeadMenu(item.name)}
+                    // onLongPress={() => onPressHeadMenu(item.name)}//feature to share folder
                 >
                     <AntDesign name="folder1" size={100} color="#1E90FF" />
                     <Text numberOfLines={2} style={{ width: 80, height: 30, fontSize: 10, textAlign: 'center', color: 'black' }}>{item.name}</Text>
@@ -275,11 +276,11 @@ const Folder = ({ navigation, route }) => {
                             </TouchableOpacity>
                         </View>
                         <View style={{ flexDirection: 'row' }}>
-                            { isDirectory &&
+                            {/* { isDirectory && //feature to share folder
                                 <TouchableOpacity onPress={() => shareFile(FOLDERS_DIRECTORY_PATH + folder + "/" + currentFile)}>
                                     <AntDesign name="upload" size={30} color="#1E90FF" style={{ marginRight: 30 }} />
                                 </TouchableOpacity>
-                            }
+                            } */}
                             <TouchableOpacity onPress={() => shareFile(FOLDERS_DIRECTORY_PATH + folder + "/" + currentFile)}>
                                 <FontAwesome name="share-alt" size={30} color="#1E90FF" style={{ marginRight: 30 }} />
                             </TouchableOpacity>

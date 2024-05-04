@@ -15,6 +15,7 @@ const FullScreenImageModal = ({ isVisible, pathImage, onClose, onPressModalRenam
     const [currentRemotePath, setCurrentRemotePath] = useState(null);
 
     const getDirectoriesFromDeskApp = async () => {
+        console.log("connessione da parte")
         try {
             const directories = await fileServiceNET.fetchDirectories();
             setDirectories(directories);

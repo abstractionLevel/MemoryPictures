@@ -25,7 +25,6 @@ const fileServiceNET = {
         // let lastIndex = pathImage.lastIndexOf("/");
         // const fileName = pathImage.substring(lastIndex + 1);
         const fileName =  getFileNameFromPath(pathImage)
-        console.log("filename: ", fileName)
         socket.emit('file', {
             filename: fileName,
             content: fileContent,
@@ -79,7 +78,7 @@ export default fileServiceNET;
 
 export const connectToAppP = () => {
     return new Promise((resolve, reject) => {
-
+        console.log("provo a connettermi")
         const socket = io(IP_SERVER_APP, {
             query: { clientId: "rect-native-12" }
         });
