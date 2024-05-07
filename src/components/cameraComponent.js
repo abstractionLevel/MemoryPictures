@@ -2,39 +2,85 @@ import React, { useState, useRef, useEffect } from 'react';
 import { View, Button, Image, StyleSheet, TouchableOpacity, Text } from 'react-native';
 import SetFileNameModal from '../modal/setNameFileModal';
 import AntDesign from 'react-native-vector-icons/AntDesign';
-import Feather from 'react-native-vector-icons/Feather';
-import { FOLDERS_DIRECTORY_PATH } from '../constant/constants';
+import Feather from 'react-native-vector-icons/Feather'
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import { Camera, useCameraDevices } from 'react-native-vision-camera';
-import RNFS from 'react-native-fs';
 import { writeFile } from '../services/fileServiceIO';
-
+import Timer from 'react-native-timer';
 const CameraComponent = ({ folder, onClose }) => {
 
-    const [cameraPermission, setCameraPermission] = useState();
     const [capturedImage, setCapturedImage] = useState(null);
     const [isModalVisible, setIsModalVisible] = useState(false);
-    const [colorCircleCamera, setColorCircleCamera] = useState("black");
-    const [isCamera, setIsCamera] = useState(true);
+    const [colorCircleCamera, setColorCircleCamera] = useState("white");
+    const [isCamera, setIsCamera] = useState(false);
+    const [isVideo, setIsVideo] = useState(true);
+    const [isRecordVideo, setIsRecordVideo] = useState(false);
+    const [isPauseRecordVideo, setIsPauseRecordVideo] = useState(false);
+    const [isVisibleIconRecord, setIsVisibleIconRecord] = useState(true);
+    const [videoTimer, setVideoTimer] = useState(null);
     const camera = useRef(null);
     const devices = useCameraDevices();
     const device = devices.back;
 
-    const takePicture = async () => {
-        setColorCircleCamera("red");
-        try {
-            const data = await camera.current.takePhoto({});
-            setCapturedImage(data.path);
-        } catch (error) {
-            console.error('Errore durante la cattura dell\'immagine:', error);
-        }
+    const record = async () => {
+
+        await recordVideo();
+        await takePicture();
+
     };
 
+    const recordVideo = async () => {
+        if (isVideo) {
+            setIsRecordVideo(true);
+            if (colorCircleCamera === "white") {
+                setColorCircleCamera("red");
+                camera.current.startRecording({
+                    onRecordingFinished: (video) => console.log(video),
+                    onRecordingError: (error) => console.error(error)
+                });
+            } else if (colorCircleCamera === "red") {
+                setColorCircleCamera("white");
+                await await camera.current.stopRecording()
+            }
+        }
+    }
+
+    const takePicture = async () => {
+        if (isCamera) {
+            if (colorCircleCamera === "white") {
+                setColorCircleCamera("red")
+                const data = await camera.current.takePhoto({});
+                setCapturedImage(data.path);
+            }
+        }
+    }
+
+    const stopRecordVideo = async () => {
+        setIsRecordVideo(false);
+        setIsPauseRecordVideo(false);
+        setIsVisibleIconRecord(false);
+        setColorCircleCamera("white");
+        await await camera.current.stopRecording()
+    }
+
+    const pauseRecordVideo = async () => {
+        if (!isPauseRecordVideo) {
+            setIsPauseRecordVideo(true);
+            await camera.current.pauseRecording()
+        } else {
+            setIsPauseRecordVideo(false);
+            await camera.current.resumeRecording()
+
+        }
+
+    }
+
     const saveImageHandler = async (fileName) => {
-        await writeFile(capturedImage,folder,fileName)
+        await writeFile(capturedImage, folder, fileName)
         // if (capturedImage) {
         //     const directoryTo = FOLDERS_DIRECTORY_PATH + folder + "/" + fileName;
         //     const imagePathTo = directoryTo;
-    
+
         //     try {
         //         await RNFS.copyFile(capturedImage, imagePathTo);
         //         console.log('Immagine salvata con successo:', imagePathTo);
@@ -56,6 +102,23 @@ const CameraComponent = ({ folder, onClose }) => {
         getPermission();
     }, []);
 
+    useEffect(() => {
+        let intervalId;
+
+        if (isRecordVideo && !isPauseRecordVideo) {
+            intervalId = setInterval(() => {
+                setVideoTimer(seconds => seconds + 1);
+                setIsVisibleIconRecord(prevVisible => !prevVisible)
+            }, 1000);
+        } else if(!isRecordVideo) {
+            clearInterval(intervalId);
+            setVideoTimer(null);
+        }
+
+        return () => clearInterval(intervalId);
+
+    }, [isRecordVideo,isPauseRecordVideo])
+
     if (device == null) {
         return <Text>Camera not available</Text>;
     }
@@ -75,10 +138,20 @@ const CameraComponent = ({ folder, onClose }) => {
                     </View>
                 </View>
             )}
-            {(!capturedImage && isCamera) && (
+            {(!capturedImage && (isCamera || isVideo)) && (
                 <View style={styles.cameraView} >
-                    <View style={{ height: '10%', justifyContent: 'center', alignItems: 'flex-end' }}>
-                        <TouchableOpacity onPress={onClose} style={{ marginTop: 30, marginRight: 20 }}>
+
+                    <View style={{ height: '5%', flexDirection: 'row', marginTop: 10, justifyContent: !isRecordVideo ? 'flex-end' : 'space-between' }}>
+                        {isRecordVideo && (
+                            <View style={{ flexDirection: 'row',marginLeft:10 }}>
+                                {isVisibleIconRecord && !isPauseRecordVideo? (
+                                    <FontAwesome name="circle" style={{ marginRight: 10 ,marginTop:2}} size={22} color={"red"} />
+                                ) : <FontAwesome name="circle" style={{ marginRight: 10 }} size={22} color={!isPauseRecordVideo  ? "white" : "red"} />}
+                               
+                                <Text style={{ fontSize: 20 }}>{videoTimer}</Text>
+                            </View>
+                        )}
+                        <TouchableOpacity onPress={onClose} style={{ marginRight: 20 }}>
                             <AntDesign name="close" size={24} color="black" />
                         </TouchableOpacity>
                     </View>
@@ -87,11 +160,36 @@ const CameraComponent = ({ folder, onClose }) => {
                         style={styles.camera}
                         device={device}
                         isActive={true}
-                        photo={true}
+                        video={isVideo}
+                        photo={isCamera}
                     />
-                    <View style={{ justifyContent: 'center', alignItems: 'center' }}>
-                        <Feather name="circle" size={64} color={colorCircleCamera} onPress={takePicture} />
-                    </View>
+                    {!isRecordVideo && (
+                        <>
+                            <View style={{ height: '5%', alignItems: 'center', justifyContent: 'center', backgroundColor: 'black', flexDirection: 'row' }}>
+                                <TouchableOpacity onPress={() => { setIsVideo(true), setIsCamera(false) }} style={{ marginRight: 20 }}>
+                                    <Text style={{ color: isVideo ? "white" : "gray", fontSize: 24 }}>Video</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity onPress={() => { setIsVideo(false), setIsCamera(true) }} style={{ marginRight: 20 }}>
+                                    <Text style={{ color: isCamera ? "white" : "gray", fontSize: 24 }}>Photo</Text>
+                                </TouchableOpacity>
+                            </View>
+
+                            <View style={{ justifyContent: 'center', alignItems: 'center', height: '10%', backgroundColor: 'black' }}>
+                                <Feather name="circle" size={64} color={colorCircleCamera} onPress={record} />
+                            </View>
+                        </>
+                    )}
+                    {isRecordVideo && (
+                        <View style={{ height: '10%', alignItems: 'center', justifyContent: 'center', flexDirection: 'row' }}>
+                            <TouchableOpacity onPress={stopRecordVideo} style={{ marginRight: 20 }}>
+                                <FontAwesome name="stop" size={54} color={"black"} />
+                            </TouchableOpacity>
+                            <TouchableOpacity onPress={pauseRecordVideo} style={{ marginRight: 20 }}>
+                                <Feather name={isPauseRecordVideo ? "play-circle" : "pause"} size={54} color={isPauseRecordVideo ? "red" : "black"} />
+                            </TouchableOpacity>
+                        </View>
+                    )}
+
                 </View>
             )}
             <SetFileNameModal
