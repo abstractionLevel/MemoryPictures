@@ -5,8 +5,10 @@ import AntDesign from 'react-native-vector-icons/AntDesign';
 import Feather from 'react-native-vector-icons/Feather'
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import { Camera, useCameraDevices } from 'react-native-vision-camera';
-import { writeFile } from '../services/fileServiceIO';
-import Timer from 'react-native-timer';
+import { saveVideo, writeFile } from '../services/fileServiceIO';
+import RNFS from 'react-native-fs';
+import { deleteFolder } from '../utils/utils';
+
 const CameraComponent = ({ folder, onClose }) => {
 
     const [capturedImage, setCapturedImage] = useState(null);
@@ -60,7 +62,8 @@ const CameraComponent = ({ folder, onClose }) => {
         setIsPauseRecordVideo(false);
         setIsVisibleIconRecord(false);
         setColorCircleCamera("white");
-        await await camera.current.stopRecording()
+        await camera.current.stopRecording();
+        await saveVideo(folder);
     }
 
     const pauseRecordVideo = async () => {

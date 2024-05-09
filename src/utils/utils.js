@@ -42,7 +42,7 @@ export const checkFileType = async (filePath) => {
                 return 'zip';
             } else if (type.ext.includes('dir')) {
                 return 'dir';
-            }  else {
+            } else {
                 return 'altro';
             }
         })
@@ -128,7 +128,23 @@ export const getValueWithoutLastElement = (value) => {
     return value.substring(0, lastIndexSlash);
 }
 
-export const getFileNameFromPath =  (path) => {
+export const getFileNameFromPath = (path) => {
     let lastIndex = path.lastIndexOf("/");
-    return   path.substring(lastIndex + 1);
-  };
+    return path.substring(lastIndex + 1);
+};
+
+export const deleteFolder = async (contentFolder) => {
+    for (const item of contentFolder) {
+        try {
+            await RNFS.unlink(item.path);
+            console.log(`Deleted: ${item.name}`);
+        } catch (error) {
+            console.error(`Error deleting ${item.name}: ${error}`);
+        }
+    }
+}
+
+export const takeLastElementAfterPoint = value => {
+    const lastIndexSlash = value.lastIndexOf('.');
+    return value.substring(lastIndexSlash + 1);
+}

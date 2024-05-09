@@ -101,6 +101,7 @@ const Folder = ({ navigation, route }) => {
 
         const documentDirectory = FOLDERS_DIRECTORY_PATH + folder;
         const contentFolder = await RNFS.readDir(documentDirectory);
+        console.log("contenuto folder ", contentFolder)//stampare i video salvati
         let contents = [];
 
         if (contentFolder) {
