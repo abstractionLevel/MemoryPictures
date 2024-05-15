@@ -6,8 +6,8 @@ import Feather from 'react-native-vector-icons/Feather'
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import { Camera, useCameraDevices } from 'react-native-vision-camera';
 import { saveVideo, writeFile } from '../services/fileServiceIO';
-import RNFS from 'react-native-fs';
-import { deleteFolder } from '../utils/utils';
+import { FOLDERS_DIRECTORY_PATH } from '../constant/constants';
+import { CameraRoll } from "@react-native-camera-roll/camera-roll";
 
 const CameraComponent = ({ folder, onClose }) => {
 
@@ -37,7 +37,19 @@ const CameraComponent = ({ folder, onClose }) => {
             if (colorCircleCamera === "white") {
                 setColorCircleCamera("red");
                 camera.current.startRecording({
-                    onRecordingFinished: (video) => console.log(video),
+                    onRecordingFinished: async (video) => {
+                        const path = video.path
+                        try {
+                            // await CameraRoll.save( `file://${path}`, {
+                            //     type: 'video',
+                            // })
+                            await saveVideo(folder);
+                        }
+                        catch(err) {
+                            console.log(err)
+                        }
+                    
+                    },
                     onRecordingError: (error) => console.error(error)
                 });
             } else if (colorCircleCamera === "red") {
@@ -63,7 +75,7 @@ const CameraComponent = ({ folder, onClose }) => {
         setIsVisibleIconRecord(false);
         setColorCircleCamera("white");
         await camera.current.stopRecording();
-        await saveVideo(folder);
+        // await saveVideo(folder);
     }
 
     const pauseRecordVideo = async () => {
@@ -113,14 +125,14 @@ const CameraComponent = ({ folder, onClose }) => {
                 setVideoTimer(seconds => seconds + 1);
                 setIsVisibleIconRecord(prevVisible => !prevVisible)
             }, 1000);
-        } else if(!isRecordVideo) {
+        } else if (!isRecordVideo) {
             clearInterval(intervalId);
             setVideoTimer(null);
         }
 
         return () => clearInterval(intervalId);
 
-    }, [isRecordVideo,isPauseRecordVideo])
+    }, [isRecordVideo, isPauseRecordVideo])
 
     if (device == null) {
         return <Text>Camera not available</Text>;
@@ -146,11 +158,11 @@ const CameraComponent = ({ folder, onClose }) => {
 
                     <View style={{ height: '5%', flexDirection: 'row', marginTop: 10, justifyContent: !isRecordVideo ? 'flex-end' : 'space-between' }}>
                         {isRecordVideo && (
-                            <View style={{ flexDirection: 'row',marginLeft:10 }}>
-                                {isVisibleIconRecord && !isPauseRecordVideo? (
-                                    <FontAwesome name="circle" style={{ marginRight: 10 ,marginTop:2}} size={22} color={"red"} />
-                                ) : <FontAwesome name="circle" style={{ marginRight: 10 }} size={22} color={!isPauseRecordVideo  ? "white" : "red"} />}
-                               
+                            <View style={{ flexDirection: 'row', marginLeft: 10 }}>
+                                {isVisibleIconRecord && !isPauseRecordVideo ? (
+                                    <FontAwesome name="circle" style={{ marginRight: 10, marginTop: 2 }} size={22} color={"red"} />
+                                ) : <FontAwesome name="circle" style={{ marginRight: 10 }} size={22} color={!isPauseRecordVideo ? "white" : "red"} />}
+
                                 <Text style={{ fontSize: 20 }}>{videoTimer}</Text>
                             </View>
                         )}

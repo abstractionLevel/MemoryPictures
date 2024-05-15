@@ -107,6 +107,7 @@ android {
 
 dependencies {
     // The version of react-native is set by the React Native Gradle Plugin
+    implementation project(':react-native-camera-roll_camera-roll')
     implementation project(':react-native-file-viewer')
     implementation project(':react-native-zip-archive')
     implementation project(':react-native-permissions')
@@ -115,8 +116,8 @@ dependencies {
     implementation("com.facebook.react:react-android")
     implementation("com.facebook.react:flipper-integration")
     implementation project(':react-native-share')
-
-
+    implementation project(':react-native-video')
+    implementation "androidx.appcompat:appcompat:1.0.0"
 
     if (hermesEnabled.toBoolean()) {
         implementation("com.facebook.react:hermes-android")
